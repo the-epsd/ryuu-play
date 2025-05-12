@@ -7,6 +7,8 @@ import { AlertService } from '../shared/alert/alert.service';
 import { ApiError } from '../api/api.error';
 import { DeckListEntry } from '../api/interfaces/deck.interface';
 import { DeckService } from '../api/services/deck.service';
+import { Archetype } from '@ptcg/common';
+import { ArchetypeUtils } from './deck-archetype/deck-archetype.utils';
 
 @UntilDestroy()
 @Component({
@@ -117,6 +119,21 @@ export class DeckComponent implements OnInit {
       invalidValues,
       value: name
     });
+  }
+
+  getArchetype(deck: DeckListEntry, returnSingle: boolean = false): Archetype | Archetype[] {
+    if (!deck) return returnSingle ? Archetype.UNOWN : [Archetype.UNOWN];
+
+    // If manual archetypes are set, use those
+    if (deck.manualArchetype1 || deck.manualArchetype2) {
+      const archetypes = [];
+      if (deck.manualArchetype1) archetypes.push(deck.manualArchetype1);
+      if (deck.manualArchetype2) archetypes.push(deck.manualArchetype2);
+      return returnSingle ? archetypes[0] : archetypes;
+    }
+
+    // Otherwise use auto-detection
+    return ArchetypeUtils.getArchetype(deck.deckItems, returnSingle);
   }
 
   private handleError(error: ApiError): void {

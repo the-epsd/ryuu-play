@@ -13,6 +13,7 @@ import { DeckEditPane } from '../deck-edit-panes/deck-edit-pane.interface';
 import { DeckEditToolbarFilter } from '../deck-edit-toolbar/deck-edit-toolbar-filter.interface';
 import { DeckService } from '../../api/services/deck.service';
 import { FileDownloadService } from '../../shared/file-download/file-download.service';
+import { Archetype } from '@ptcg/common';
 
 @UntilDestroy()
 @Component({
@@ -115,7 +116,13 @@ export class DeckEditComponent implements OnInit {
     }
 
     this.loading = true;
-    this.deckService.saveDeck(this.deck.id, this.deck.name, items).pipe(
+    this.deckService.saveDeck(
+      this.deck.id,
+      this.deck.name,
+      items,
+      this.deck.manualArchetype1 as Archetype,
+      this.deck.manualArchetype2 as Archetype
+    ).pipe(
       finalize(() => { this.loading = false; }),
       untilDestroyed(this)
     ).subscribe(() => {

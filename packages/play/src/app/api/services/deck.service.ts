@@ -3,14 +3,14 @@ import { Injectable } from '@angular/core';
 import { ApiService } from '../api.service';
 import { DeckListResponse, DeckResponse } from '../interfaces/deck.interface';
 import { Response } from '../interfaces/response.interface';
-
+import { Archetype } from '@ptcg/common';
 
 @Injectable()
 export class DeckService {
 
   constructor(
     private api: ApiService,
-  ) {}
+  ) { }
 
   public getList() {
     return this.api.get<DeckListResponse>('/v1/decks/list');
@@ -27,11 +27,13 @@ export class DeckService {
     });
   }
 
-  public saveDeck(deckId: number, name: string, cards: string[]) {
+  public saveDeck(deckId: number, name: string, cards: string[], manualArchetype1?: Archetype, manualArchetype2?: Archetype) {
     return this.api.post<DeckResponse>('/v1/decks/save', {
       id: deckId,
       name,
-      cards
+      cards,
+      manualArchetype1,
+      manualArchetype2
     });
   }
 
