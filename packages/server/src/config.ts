@@ -1,8 +1,7 @@
-
 export const config = {
   backend: {
-    address: 'localhost',
-    port: 12021,
+    address: '0.0.0.0',
+    port: process.env.PORT ? parseInt(process.env.PORT) : 12021,
     serverPassword: '', // Password required to create an account
     registrationEnabled: true,  // Completly disables/enables registration
     allowCors: true,

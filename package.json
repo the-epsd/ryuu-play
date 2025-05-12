@@ -18,6 +18,7 @@
   "license": "MIT",
   "dependencies": {
     "@ptcg/server": "*",
-    "@ptcg/sets": "*"
+    "@ptcg/sets": "*",
+    "dotenv": "^16.5.0"
   }
 }
