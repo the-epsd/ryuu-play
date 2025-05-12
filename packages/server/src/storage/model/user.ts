@@ -24,13 +24,13 @@ export class User extends BaseEntity {
   @Column()
   public password: string = '';
 
-  @Column({ type: 'bigint', transformer: [ bigint ] })
+  @Column({ type: 'bigint', transformer: [bigint] })
   public registered: number = 0;
-  
-  @Column({ type: 'bigint', transformer: [ bigint ] })
+
+  @Column({ type: 'bigint', transformer: [bigint] })
   public lastSeen: number = 0;
 
-  @Column({ type: 'bigint', transformer: [ bigint ] })
+  @Column({ type: 'bigint', transformer: [bigint] })
   public lastRankingChange: number = 0;
 
   @Column()

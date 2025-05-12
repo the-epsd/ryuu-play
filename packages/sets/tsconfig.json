@@ -1,7 +1,10 @@
 {
   "extends": "../common/tsconfig",
   "compilerOptions": {
-    "outDir": "dist/cjs"
+    "outDir": "dist/cjs",
+    "strict": false,
+    "noUnusedLocals": false,
+    "noImplicitAny": false
   },
   "include": [
     "src/**/*.ts"

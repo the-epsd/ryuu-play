@@ -1,8 +1,6 @@
-import { AttachEnergyPrompt, CardAssign } from '@ptcg/common';
-import { Player, State, Action, ResolvePromptAction, Prompt, StateUtils,
-  PokemonCardList, PlayerType, CardList, Card, CardTarget } from '@ptcg/common';
+import { CardAssign, State, Player, Prompt, Action, AttachEnergyPrompt, ResolvePromptAction, deepClone, Card, CardList, PlayerType, CardTarget, PokemonCardList, StateUtils } from '@ptcg/common';
 import { PromptResolver } from './prompt-resolver';
-import { deepClone } from '@ptcg/common';
+
 
 interface ResultItem {
   value: CardAssign[] | null;
@@ -19,7 +17,7 @@ export class AttachEnergyPromptResolver extends PromptResolver {
   }
 
   private getPromptResult(state: State, prompt: AttachEnergyPrompt): CardAssign[] | null {
-    const copy = deepClone(state, [ Card ]);
+    const copy = deepClone(state, [Card]);
 
     const results: ResultItem[] = [];
     const baseScore = this.getStateScore(state, prompt.playerId);
@@ -41,7 +39,7 @@ export class AttachEnergyPromptResolver extends PromptResolver {
       if (result === undefined || result.value === null) {
         break;
       }
-      value =  [ ...value, result.value[0] ];
+      value = [...value, result.value[0]];
       results.push({ value, score: result.score });
     }
 
@@ -69,7 +67,7 @@ export class AttachEnergyPromptResolver extends PromptResolver {
     const hasOpponent = [PlayerType.TOP_PLAYER, PlayerType.ANY].includes(prompt.playerType);
     const hasPlayer = [PlayerType.BOTTOM_PLAYER, PlayerType.ANY].includes(prompt.playerType);
 
-    let results: {target: CardTarget, cardList: PokemonCardList, score: number}[] = [];
+    let results: { target: CardTarget, cardList: PokemonCardList, score: number }[] = [];
     if (hasOpponent) {
       opponent.forEachPokemon(PlayerType.TOP_PLAYER, (cardList, card, target) => {
         if (prompt.slots.includes(target.slot)) {

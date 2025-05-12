@@ -7,8 +7,13 @@ import { GameMessage } from '../../game-message';
 export const ChoosePrizePromptType = 'Choose prize';
 
 export interface ChoosePrizeOptions {
+  isSecret: boolean;
   count: number;
+  max: number;
+  blocked: number[];
+  useOpponentPrizes: boolean;
   allowCancel: boolean;
+  destination?: CardList;
 }
 
 export class ChoosePrizePrompt extends Prompt<CardList[]> {
@@ -27,8 +32,15 @@ export class ChoosePrizePrompt extends Prompt<CardList[]> {
     // Default options
     this.options = Object.assign({}, {
       count: 1,
-      allowCancel: false
+      max: 1,
+      blocked: [],
+      allowCancel: false,
+      isSecret: false,
+      useOpponentPrizes: false
     }, options);
+
+    this.options.max = this.options.count;
+
   }
 
   public decode(result: number[] | null, state: State): CardList[] | null {
@@ -39,7 +51,16 @@ export class ChoosePrizePrompt extends Prompt<CardList[]> {
     if (player === undefined) {
       throw new GameError(GameMessage.INVALID_PROMPT_RESULT);
     }
-    const prizes = player.prizes.filter(p => p.cards.length > 0);
+
+    const targetPlayer = this.options.useOpponentPrizes
+      ? state.players.find(p => p.id !== this.playerId)
+      : player;
+
+    if (targetPlayer === undefined) {
+      throw new GameError(GameMessage.INVALID_PROMPT_RESULT);
+    }
+
+    const prizes = targetPlayer.prizes.filter(p => p.cards.length > 0);
     return result.map(index => prizes[index]);
   }
 
@@ -62,5 +83,4 @@ export class ChoosePrizePrompt extends Prompt<CardList[]> {
     }
     return true;
   }
-
 }

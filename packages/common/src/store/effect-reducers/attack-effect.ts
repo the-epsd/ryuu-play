@@ -1,5 +1,5 @@
 import { GameError } from '../../game-error';
-import { GameMessage } from '../../game-message';
+import { GameLog, GameMessage } from '../../game-message';
 import { Effect } from '../effects/effect';
 import { State } from '../state/state';
 import { StoreLike } from '../store-like';
@@ -14,15 +14,40 @@ export function attackReducer(store: StoreLike, state: State, effect: Effect): S
 
   if (effect instanceof PutDamageEffect) {
     const target = effect.target;
-    const pokemonCard = target.getPokemonCard();
-    if (pokemonCard === undefined) {
+    const sourceOwner = StateUtils.findOwner(state, effect.source);
+    const targetCard = target.getPokemonCard();
+
+    if (targetCard === undefined) {
       throw new GameError(GameMessage.ILLEGAL_ACTION);
+    }
+
+    const opponent = StateUtils.getOpponent(state, effect.player);
+
+    if (effect.attackEffect && target === opponent.active && !effect.weaknessApplied) {
+      // Apply weakness
+      const applyWeakness = new ApplyWeaknessEffect(effect.attackEffect, effect.damage);
+      applyWeakness.target = effect.target;
+      applyWeakness.ignoreWeakness = effect.attackEffect.ignoreWeakness;
+      applyWeakness.ignoreResistance = effect.attackEffect.ignoreResistance;
+      state = store.reduceEffect(state, applyWeakness);
+
+      effect.damage = applyWeakness.damage;
     }
 
     const damage = Math.max(0, effect.damage);
     target.damage += damage;
 
+    const targetOwner = StateUtils.findOwner(state, target);
+    targetOwner.marker.addMarkerToState(effect.player.DAMAGE_DEALT_MARKER);
+
     if (damage > 0) {
+      store.log(state, GameLog.LOG_PLAYER_DEALS_DAMAGE, {
+        name: sourceOwner.name,
+        damage: damage,
+        target: targetCard.name,
+        effect: effect.attack.name,
+      });
+
       const afterDamageEffect = new AfterDamageEffect(effect.attackEffect, damage);
       afterDamageEffect.target = effect.target;
       store.reduceEffect(state, afterDamageEffect);
@@ -40,6 +65,7 @@ export function attackReducer(store: StoreLike, state: State, effect: Effect): S
 
     const dealDamage = new PutDamageEffect(base, applyWeakness.damage);
     dealDamage.target = effect.target;
+    dealDamage.weaknessApplied = true;
     state = store.reduceEffect(state, dealDamage);
 
     return state;

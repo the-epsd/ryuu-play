@@ -2,12 +2,15 @@ import { Player } from './player';
 import { Prompt } from '../prompts/prompt';
 import { StateLog } from './state-log';
 import { Rules } from './rules';
+import { Attack } from '../..';
 
 export enum GamePhase {
   WAITING_FOR_PLAYERS,
   SETUP,
   PLAYER_TURN,
   ATTACK,
+  AFTER_ATTACK,
+  CHOOSE_PRIZES,
   BETWEEN_TURNS,
   FINISHED
 }
@@ -39,4 +42,13 @@ export class State {
 
   public players: Player[] = [];
 
+  public skipOpponentTurn = false;
+
+  public lastAttack: Attack | null = null;
+
+  public playerLastAttack: { [playerId: number]: Attack } = {};
+
+  public isSuddenDeath?: boolean;
+
+  public benchSizeChangeHandled: boolean = false;
 }

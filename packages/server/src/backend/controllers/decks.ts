@@ -16,7 +16,7 @@ export class Decks extends Controller {
     const user = await User.findOne({ where: { id: userId }, relations: ['decks'] });
 
     if (user === null) {
-      res.send({error: ApiErrorEnum.PROFILE_INVALID});
+      res.send({ error: ApiErrorEnum.PROFILE_INVALID });
       return;
     }
 
@@ -27,7 +27,7 @@ export class Decks extends Controller {
       cardTypes: JSON.parse(deck.cardTypes)
     }));
 
-    res.send({ok: true, decks});
+    res.send({ ok: true, decks });
   }
 
   @Get('/get/:id')
@@ -38,7 +38,7 @@ export class Decks extends Controller {
     const entity = await Deck.findOne({ where: { id: deckId }, relations: ['user'] });
 
     if (entity === null || entity.user.id !== userId) {
-      res.send({error: ApiErrorEnum.DECK_INVALID});
+      res.send({ error: ApiErrorEnum.DECK_INVALID });
       return;
     }
 
@@ -50,7 +50,7 @@ export class Decks extends Controller {
       cards: JSON.parse(entity.cards)
     };
 
-    res.send({ok: true, deck});
+    res.send({ ok: true, deck });
   }
 
   @Post('/save')
@@ -65,14 +65,14 @@ export class Decks extends Controller {
     // optional id parameter, without ID new deck will be created
     if (body.id !== undefined && typeof body.id !== 'number') {
       res.status(400);
-      res.send({error: ApiErrorEnum.VALIDATION_INVALID_PARAM, param: 'id'});
+      res.send({ error: ApiErrorEnum.VALIDATION_INVALID_PARAM, param: 'id' });
       return;
     }
 
     // check if all cards exist in our database
     if (!this.validateCards(body.cards)) {
       res.status(400);
-      res.send({error: ApiErrorEnum.VALIDATION_INVALID_PARAM, param: 'cards'});
+      res.send({ error: ApiErrorEnum.VALIDATION_INVALID_PARAM, param: 'cards' });
       return;
     }
 
@@ -81,7 +81,7 @@ export class Decks extends Controller {
 
     if (user === null) {
       res.status(400);
-      res.send({error: ApiErrorEnum.PROFILE_INVALID});
+      res.send({ error: ApiErrorEnum.PROFILE_INVALID });
       return;
     }
 
@@ -91,7 +91,7 @@ export class Decks extends Controller {
 
     if (deck === null || deck.user.id !== user.id) {
       res.status(400);
-      res.send({error: ApiErrorEnum.DECK_INVALID});
+      res.send({ error: ApiErrorEnum.DECK_INVALID });
       return;
     }
 
@@ -105,15 +105,17 @@ export class Decks extends Controller {
       deck = await deck.save();
     } catch (error) {
       res.status(400);
-      res.send({error: ApiErrorEnum.NAME_DUPLICATE});
+      res.send({ error: ApiErrorEnum.NAME_DUPLICATE });
       return;
     }
 
-    res.send({ok: true, deck: {
-      id: deck.id,
-      name: deck.name,
-      cards: body.cards
-    }});
+    res.send({
+      ok: true, deck: {
+        id: deck.id,
+        name: deck.name,
+        cards: body.cards
+      }
+    });
   }
 
   @Post('/delete')
@@ -129,7 +131,7 @@ export class Decks extends Controller {
 
     if (user === null) {
       res.status(400);
-      res.send({error: ApiErrorEnum.PROFILE_INVALID});
+      res.send({ error: ApiErrorEnum.PROFILE_INVALID });
       return;
     }
 
@@ -137,13 +139,13 @@ export class Decks extends Controller {
 
     if (deck === null || deck.user.id !== user.id) {
       res.status(400);
-      res.send({error: ApiErrorEnum.DECK_INVALID});
+      res.send({ error: ApiErrorEnum.DECK_INVALID });
       return;
     }
 
     await deck.remove();
 
-    res.send({ok: true});
+    res.send({ ok: true });
   }
 
   @Post('/rename')
@@ -160,7 +162,7 @@ export class Decks extends Controller {
 
     if (user === null) {
       res.status(400);
-      res.send({error: ApiErrorEnum.PROFILE_INVALID});
+      res.send({ error: ApiErrorEnum.PROFILE_INVALID });
       return;
     }
 
@@ -168,7 +170,7 @@ export class Decks extends Controller {
 
     if (deck === null || deck.user.id !== user.id) {
       res.status(400);
-      res.send({error: ApiErrorEnum.DECK_INVALID});
+      res.send({ error: ApiErrorEnum.DECK_INVALID });
       return;
     }
 
@@ -177,14 +179,16 @@ export class Decks extends Controller {
       deck = await deck.save();
     } catch (error) {
       res.status(400);
-      res.send({error: ApiErrorEnum.NAME_DUPLICATE});
+      res.send({ error: ApiErrorEnum.NAME_DUPLICATE });
       return;
     }
 
-    res.send({ok: true, deck: {
-      id: deck.id,
-      name: deck.name
-    }});
+    res.send({
+      ok: true, deck: {
+        id: deck.id,
+        name: deck.name
+      }
+    });
   }
 
   @Post('/duplicate')
@@ -201,7 +205,7 @@ export class Decks extends Controller {
 
     if (user === null) {
       res.status(400);
-      res.send({error: ApiErrorEnum.PROFILE_INVALID});
+      res.send({ error: ApiErrorEnum.PROFILE_INVALID });
       return;
     }
 
@@ -209,7 +213,7 @@ export class Decks extends Controller {
 
     if (deck === null || deck.user.id !== user.id) {
       res.status(400);
-      res.send({error: ApiErrorEnum.DECK_INVALID});
+      res.send({ error: ApiErrorEnum.DECK_INVALID });
       return;
     }
 

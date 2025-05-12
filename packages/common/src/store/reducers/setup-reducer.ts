@@ -5,7 +5,6 @@ import { Card } from '../card/card';
 import { CardList } from '../state/card-list';
 import { CoinFlipPrompt } from '../prompts/coin-flip-prompt';
 import { ChooseCardsPrompt } from '../prompts/choose-cards-prompt';
-import { DeckAnalyser } from '../../game/cards/deck-analyser';
 import { InvitePlayerAction } from '../actions/invite-player-action';
 import { InvitePlayerPrompt } from '../prompts/invite-player-prompt';
 import { Player } from '../state/player';
@@ -17,13 +16,15 @@ import { GameMessage, GameLog } from '../../game-message';
 import { PlayerType } from '../actions/play-card-action';
 import { PokemonCardList } from '../state/pokemon-card-list';
 import { StoreLike } from '../store-like';
-import { SuperType, Stage } from '../card/card-types';
-import { WhoBeginsEffect } from '../effects/game-phase-effects';
+import { SuperType, Stage, CardTag } from '../card/card-types';
 import { endGame } from '../effect-reducers/check-effect';
 import { initNextTurn } from '../effect-reducers/game-phase-effect';
+import { SelectPrompt } from '../prompts/select-prompt';
+import { WhoBeginsEffect } from '../effects/game-phase-effects';
+import { PokemonCard } from '../card/pokemon-card';
+import { DeckAnalyser } from '../../game';
 
-
-function putStartingPokemonsAndPrizes(player: Player, cards: Card[]): void {
+function putStartingPokemonsAndPrizes(player: Player, cards: Card[], state: State): void {
   if (cards.length === 0) {
     return;
   }
@@ -31,80 +32,17 @@ function putStartingPokemonsAndPrizes(player: Player, cards: Card[]): void {
   for (let i = 1; i < cards.length; i++) {
     player.hand.moveCardTo(cards[i], player.bench[i - 1]);
   }
+  // Always place 6 prize cards
   for (let i = 0; i < 6; i++) {
     player.deck.moveTo(player.prizes[i], 1);
   }
 }
 
-function* setupGame(next: Function, store: StoreLike, state: State): IterableIterator<State> {
-  const basicPokemon = {superType: SuperType.POKEMON, stage: Stage.BASIC};
-  const chooseCardsOptions = { min: 1, max: 6, allowCancel: false };
+export function* setupGame(next: Function, store: StoreLike, state: State): IterableIterator<State> {
   const player = state.players[0];
   const opponent = state.players[1];
-
-  let playerHasBasic = false;
-  let opponentHasBasic = false;
-
-  while (!playerHasBasic || !opponentHasBasic) {
-    if (!playerHasBasic) {
-      player.hand.moveTo(player.deck);
-      yield store.prompt(state, new ShuffleDeckPrompt(player.id), order => {
-        player.deck.applyOrder(order);
-        player.deck.moveTo(player.hand, 7);
-        playerHasBasic = player.hand.count(basicPokemon) > 0;
-        next();
-      });
-    }
-
-    if (!opponentHasBasic) {
-      opponent.hand.moveTo(opponent.deck);
-      yield store.prompt(state, new ShuffleDeckPrompt(opponent.id), order => {
-        opponent.deck.applyOrder(order);
-        opponent.deck.moveTo(opponent.hand, 7);
-        opponentHasBasic = opponent.hand.count(basicPokemon) > 0;
-        next();
-      });
-    }
-
-    if (playerHasBasic && !opponentHasBasic) {
-      store.log(state, GameLog.LOG_SETUP_NO_BASIC_POKEMON, { name: opponent.name });
-      yield store.prompt(state, [
-        new ShowCardsPrompt(player.id, GameMessage.SETUP_OPPONENT_NO_BASIC,
-          opponent.hand.cards, { allowCancel: true }),
-        new AlertPrompt(opponent.id, GameMessage.SETUP_PLAYER_NO_BASIC)
-      ], results => {
-        if (results[0]) {
-          player.deck.moveTo(player.hand, 1);
-        }
-        next();
-      });
-    }
-
-    if (!playerHasBasic && opponentHasBasic) {
-      store.log(state, GameLog.LOG_SETUP_NO_BASIC_POKEMON, { name: player.name });
-      yield store.prompt(state, [
-        new ShowCardsPrompt(opponent.id, GameMessage.SETUP_OPPONENT_NO_BASIC,
-          player.hand.cards, { allowCancel: true }),
-        new AlertPrompt(player.id, GameMessage.SETUP_PLAYER_NO_BASIC)
-      ], results => {
-        if (results[0]) {
-          opponent.deck.moveTo(opponent.hand, 1);
-        }
-        next();
-      });
-    }
-  }
-
-  yield store.prompt(state, [
-    new ChooseCardsPrompt(player.id, GameMessage.CHOOSE_STARTING_POKEMONS,
-      player.hand, basicPokemon, chooseCardsOptions),
-    new ChooseCardsPrompt(opponent.id, GameMessage.CHOOSE_STARTING_POKEMONS,
-      opponent.hand, basicPokemon, chooseCardsOptions)
-  ], choice => {
-    putStartingPokemonsAndPrizes(player, choice[0]);
-    putStartingPokemonsAndPrizes(opponent, choice[1]);
-    next();
-  });
+  const basicPokemon = { superType: SuperType.POKEMON, stage: Stage.BASIC };
+  const chooseCardsOptions = { min: 1, max: 6, allowCancel: false };
 
   const whoBeginsEffect = new WhoBeginsEffect();
   store.reduceEffect(state, whoBeginsEffect);
@@ -114,10 +52,101 @@ function* setupGame(next: Function, store: StoreLike, state: State): IterableIte
   } else {
     const coinFlipPrompt = new CoinFlipPrompt(player.id, GameMessage.SETUP_WHO_BEGINS_FLIP);
     yield store.prompt(state, coinFlipPrompt, whoBegins => {
-      state.activePlayer = whoBegins ? 0 : 1;
-      next();
+      const goFirstPrompt = new SelectPrompt(
+        whoBegins ? player.id : opponent.id,
+        GameMessage.GO_FIRST,
+        [GameMessage.YES, GameMessage.NO]
+      );
+      store.prompt(state, goFirstPrompt, choice => {
+        if (choice === 0) {
+          state.activePlayer = whoBegins ? 0 : 1;
+        } else {
+          state.activePlayer = whoBegins ? 1 : 0;
+        }
+
+        next();
+      });
     });
   }
+
+  let playerHasBasic = false;
+  let opponentHasBasic = false;
+  let playerCardsToDraw = 0;
+  let opponentCardsToDraw = 0;
+
+  while (!playerHasBasic || !opponentHasBasic) {
+    if (!playerHasBasic) {
+      player.hand.moveTo(player.deck);
+      yield store.prompt(state, new ShuffleDeckPrompt(player.id), order => {
+        player.deck.applyOrder(order);
+        player.deck.moveTo(player.hand, 7);
+        playerHasBasic = player.hand.count(basicPokemon) > 0 || player.hand.cards.some(c => c.tags.includes(CardTag.PLAY_DURING_SETUP));
+        next();
+      });
+    }
+
+    if (!opponentHasBasic) {
+      opponent.hand.moveTo(opponent.deck);
+      yield store.prompt(state, new ShuffleDeckPrompt(opponent.id), order => {
+        opponent.deck.applyOrder(order);
+        opponent.deck.moveTo(opponent.hand, 7);
+        opponentHasBasic = opponent.hand.count(basicPokemon) > 0 || opponent.hand.cards.some(c => c.tags.includes(CardTag.PLAY_DURING_SETUP));
+        next();
+      });
+    }
+
+    if (playerHasBasic && !opponentHasBasic) {
+      store.log(state, GameLog.LOG_SETUP_NO_BASIC_POKEMON, { name: opponent.name });
+      yield store.prompt(state, [
+        new ShowCardsPrompt(player.id, GameMessage.SETUP_OPPONENT_NO_BASIC,
+          opponent.hand.cards, { allowCancel: false }),
+        new AlertPrompt(opponent.id, GameMessage.SETUP_PLAYER_NO_BASIC)
+      ], results => {
+        playerCardsToDraw++;
+        next();
+      });
+    }
+    if (!playerHasBasic && opponentHasBasic) {
+      store.log(state, GameLog.LOG_SETUP_NO_BASIC_POKEMON, { name: player.name });
+      yield store.prompt(state, [
+        new ShowCardsPrompt(opponent.id, GameMessage.SETUP_OPPONENT_NO_BASIC,
+          player.hand.cards, { allowCancel: false }),
+        new AlertPrompt(player.id, GameMessage.SETUP_PLAYER_NO_BASIC)
+      ], results => {
+        opponentCardsToDraw++;
+        next();
+      });
+    }
+  }
+
+  const blocked: number[] = [];
+  player.hand.cards.forEach((c, index) => {
+    if (c.tags.includes((CardTag.PLAY_DURING_SETUP)) || (c instanceof PokemonCard && c.stage === Stage.BASIC)) {
+      return state;
+    } else {
+      blocked.push(index);
+    }
+  });
+
+  const blockedOpponent: number[] = [];
+  opponent.hand.cards.forEach((c, index) => {
+    if (c.tags.includes((CardTag.PLAY_DURING_SETUP)) || (c instanceof PokemonCard && c.stage === Stage.BASIC)) {
+      return state;
+    } else {
+      blockedOpponent.push(index);
+    }
+  });
+
+  yield store.prompt(state, [
+    new ChooseCardsPrompt(player, GameMessage.CHOOSE_STARTING_POKEMONS,
+      player.hand, {}, { ...chooseCardsOptions, blocked }),
+    new ChooseCardsPrompt(opponent, GameMessage.CHOOSE_STARTING_POKEMONS,
+      opponent.hand, {}, { ...chooseCardsOptions, blocked: blockedOpponent })
+  ], choice => {
+    putStartingPokemonsAndPrizes(player, choice[0], state);
+    putStartingPokemonsAndPrizes(opponent, choice[1], state);
+    next();
+  });
 
   // Set initial Pokemon Played Turn, so players can't evolve during first turn
   const first = state.players[state.activePlayer];
@@ -125,6 +154,46 @@ function* setupGame(next: Function, store: StoreLike, state: State): IterableIte
   first.forEachPokemon(PlayerType.BOTTOM_PLAYER, cardList => { cardList.pokemonPlayedTurn = 1; });
   second.forEachPokemon(PlayerType.TOP_PLAYER, cardList => { cardList.pokemonPlayedTurn = 2; });
 
+  if (playerCardsToDraw > 0) {
+
+    const options: { message: string, value: number }[] = [];
+    for (let i = playerCardsToDraw; i >= 0; i--) {
+      options.push({ message: `Draw ${i} card(s)`, value: i });
+    }
+
+    return store.prompt(state, new SelectPrompt(
+      player.id,
+      GameMessage.WANT_TO_DRAW_CARDS,
+      options.map(c => c.message),
+      { allowCancel: false }
+    ), choice => {
+      const option = options[choice];
+      const numCardsToDraw = option.value;
+
+      player.deck.moveTo(player.hand, numCardsToDraw);
+      return initNextTurn(store, state);
+    });
+  }
+
+  if (opponentCardsToDraw > 0) {
+    const options: { message: string, value: number }[] = [];
+    for (let i = opponentCardsToDraw; i >= 0; i--) {
+      options.push({ message: `Draw ${i} card(s)`, value: i });
+    }
+
+    return store.prompt(state, new SelectPrompt(
+      opponent.id,
+      GameMessage.WANT_TO_DRAW_CARDS,
+      options.map(c => c.message),
+      { allowCancel: false }
+    ), choice => {
+      const option = options[choice];
+      const numCardsToDraw = option.value;
+
+      opponent.deck.moveTo(opponent.hand, numCardsToDraw);
+      return initNextTurn(store, state);
+    });
+  }
   return initNextTurn(store, state);
 }
 
@@ -149,6 +218,7 @@ function createPlayer(id: number, name: string): Player {
 
   player.active.isPublic = true;
   player.discard.isPublic = true;
+  player.lostzone.isPublic = true;
   player.stadium.isPublic = true;
   player.supporter.isPublic = true;
   return player;
@@ -231,8 +301,9 @@ export function setupPhaseReducer(store: StoreLike, state: State, action: Action
           return generator.next().value;
         }
       });
+      return state;
     }
+    return state;
   }
-
   return state;
 }

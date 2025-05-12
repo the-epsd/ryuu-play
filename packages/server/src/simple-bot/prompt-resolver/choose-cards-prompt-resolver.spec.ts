@@ -1,5 +1,7 @@
-import { State, Player, ResolvePromptAction, GameMessage, ChooseCardsPrompt,
-  PokemonCard, Card, CardType } from '@ptcg/common';
+import {
+  State, Player, ResolvePromptAction, GameMessage, ChooseCardsPrompt,
+  PokemonCard, Card, CardType, CardList, PokemonCardList
+} from '@ptcg/common';
 import { ChooseCardsPromptResolver } from './choose-cards-prompt-resolver';
 import {
   allSimpleTactics,
@@ -12,7 +14,7 @@ class TestCard extends PokemonCard {
   name = 'energy';
   fullName = 'energy';
   set = 'test';
-  constructor (name: string) {
+  constructor(name: string) {
     super();
     this.name = name;
   }
@@ -34,16 +36,30 @@ describe('ChooseCardsPromptResolver', () => {
     };
     resolver = new ChooseCardsPromptResolver(simpleBotOptions);
 
+    // Initialize players with proper IDs and card lists
     player = new Player();
     player.id = 1;
+    player.deck = new CardList();
+    player.hand = new CardList();
+    player.prizes = [new CardList()];
+    player.active = new PokemonCardList();
+    player.bench = [new PokemonCardList()];
+
     opponent = new Player();
     opponent.id = 2;
+    opponent.deck = new CardList();
+    opponent.hand = new CardList();
+    opponent.prizes = [new CardList()];
+    opponent.active = new PokemonCardList();
+    opponent.bench = [new PokemonCardList()];
 
+    // Initialize state with players and turn counter
     state = new State();
-    state.players = [ player, opponent ];
+    state.players = [player, opponent];
+    state.turn = 1;
 
     prompt = new ChooseCardsPrompt(
-      player.id,
+      player,
       GameMessage.CHOOSE_CARD_TO_HAND,
       player.deck,
       {}
@@ -52,7 +68,7 @@ describe('ChooseCardsPromptResolver', () => {
 
   it('Should return undefined when other prompt type', () => {
     // given
-    const other: any = { };
+    const other: any = {};
     // when
     const action = resolver.resolvePrompt(state, player, other);
     // then
@@ -71,15 +87,15 @@ describe('ChooseCardsPromptResolver', () => {
 
     // then
     expect(action instanceof ResolvePromptAction).toBeTruthy();
-    expect(result).toEqual([ card ]);
+    expect(result).toEqual([card]);
   });
 
   it('Should not choose blocked cards', () => {
     // given
-    const cards = [ new TestCard('a'), new TestCard('b'), new TestCard('c') ];
+    const cards = [new TestCard('a'), new TestCard('b'), new TestCard('c')];
     player.deck.cards = cards;
     prompt.options.max = cards.length;
-    prompt.options.blocked = [ 0, 2 ];
+    prompt.options.blocked = [0, 2];
 
     // when
     const action = resolver.resolvePrompt(state, player, prompt) as ResolvePromptAction;
@@ -87,7 +103,7 @@ describe('ChooseCardsPromptResolver', () => {
 
     // then
     expect(action instanceof ResolvePromptAction).toBeTruthy();
-    expect(result).toEqual([ new TestCard('b') ]);
+    expect(result).toEqual([new TestCard('b')]);
   });
 
   it('Should choose cards with different types', () => {
@@ -101,7 +117,7 @@ describe('ChooseCardsPromptResolver', () => {
     const p2 = new TestCard('p2');
     p2.cardType = CardType.PSYCHIC;
 
-    const cards = [ w, p, p2, r ];
+    const cards = [w, p, p2, r];
     player.deck.cards = cards;
     prompt.options.max = cards.length;
     prompt.options.differentTypes = true;

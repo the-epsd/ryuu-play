@@ -29,20 +29,15 @@ config.storage.extra = {
 config.bots.defaultPassword = 'bot';
 
 // Sets/scans config
-config.sets.scansDir = __dirname + '/scans';
-config.sets.scansDownloadUrl = 'https://ptcg.ryuu.eu/scans'; // Server to download missing scans
+config.sets.scansDir = __dirname + '';
+config.sets.scansUrl = '{cardImage}';
+// config.sets.scansDownloadUrl = 'https://ptcg.ryuu.eu/scans'; // Server to download missing scans
 
 // Define available sets
 const sets = require('@ptcg/sets');
 const cardManager = CardManager.getInstance();
-cardManager.defineSet(sets.setDiamondAndPearl);
-cardManager.defineSet(sets.setOp9);
-cardManager.defineSet(sets.setHgss);
-cardManager.defineSet(sets.setBlackAndWhite);
-cardManager.defineSet(sets.setBlackAndWhite2);
-cardManager.defineSet(sets.setBlackAndWhite3);
-cardManager.defineSet(sets.setBlackAndWhite4);
-cardManager.defineSet(sets.setSwordAndShield);
+cardManager.defineSet(sets.setAncientOrigins);
+cardManager.defineSet(sets.setArceus);
 
 // Define bots
 const botManager = BotManager.getInstance();

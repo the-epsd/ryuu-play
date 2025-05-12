@@ -11,7 +11,9 @@ export enum SlotType {
   ACTIVE,
   BENCH,
   HAND,
-  DISCARD
+  DISCARD,
+  LOSTZONE,
+  DECK
 }
 
 export interface CardTarget {
@@ -28,6 +30,6 @@ export class PlayCardAction implements Action {
     public id: number,
     public handIndex: number,
     public target: CardTarget
-  ) {}
+  ) { }
 
 }

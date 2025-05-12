@@ -2,16 +2,22 @@
   "compilerOptions": {
     "target": "es2017",
     "module": "commonjs",
-    "lib": ["dom", "es2017"],
+    "lib": [
+      "dom",
+      "es2017"
+    ],
     "declaration": true,
     "outDir": "dist/cjs",
-    "rootDirs": ["./src"],
+    "rootDirs": [
+      "./src"
+    ],
     "removeComments": false,
     "preserveConstEnums": true,
     "noEmitOnError": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "noUnusedLocals": true,
+    "noImplicitAny": true,
     "typeRoots": [
       "node_modules/@types"
     ],

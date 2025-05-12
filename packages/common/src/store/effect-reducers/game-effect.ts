@@ -6,13 +6,18 @@ import { State, GamePhase } from '../state/state';
 import { StoreLike } from '../store-like';
 import { StateUtils } from '../state-utils';
 import { CheckPokemonTypeEffect, CheckPokemonStatsEffect,
-  CheckProvidedEnergyEffect, CheckAttackCostEffect } from '../effects/check-effects';
+  CheckProvidedEnergyEffect, CheckAttackCostEffect, 
+  AddSpecialConditionsPowerEffect} from '../effects/check-effects';
 import { Weakness, Resistance } from '../card/pokemon-types';
-import { CardType, SpecialCondition, CardTag } from '../card/card-types';
+import { CardType, SpecialCondition, CardTag, BoardEffect } from '../card/card-types';
 import { AttackEffect, UseAttackEffect, HealEffect, KnockOutEffect,
-  UsePowerEffect, PowerEffect, UseStadiumEffect, EvolveEffect } from '../effects/game-effects';
+  UsePowerEffect, PowerEffect, UseStadiumEffect, EvolveEffect, 
+  UseTrainerPowerEffect,
+  TrainerPowerEffect,
+  MoveCardsEffect} from '../effects/game-effects';
 import { CoinFlipPrompt } from '../prompts/coin-flip-prompt';
 import { DealDamageEffect, ApplyWeaknessEffect } from '../effects/attack-effects';
+import { PokemonCardList } from '../state/pokemon-card-list';
 
 function applyWeaknessAndResistance(
   damage: number,
@@ -148,6 +153,33 @@ export function gameReducer(store: StoreLike, state: State, effect: Effect): Sta
     return state;
   }
 
+  if (effect instanceof UseTrainerPowerEffect) {
+    const player = effect.player;
+    const power = effect.power;
+    const card = effect.card;
+
+    store.log(state, GameLog.LOG_PLAYER_USES_ABILITY, { name: player.name, ability: power.name });
+    state = store.reduceEffect(state, new TrainerPowerEffect(player, power, card));
+    return state;
+  }
+
+  if (effect instanceof AddSpecialConditionsPowerEffect) {
+    const target = effect.target;
+    effect.specialConditions.forEach(sp => {
+      target.addSpecialCondition(sp);
+    });
+    if (effect.poisonDamage !== undefined) {
+      target.poisonDamage = effect.poisonDamage;
+    }
+    if (effect.burnDamage !== undefined) {
+      target.burnDamage = effect.burnDamage;
+    }
+    if (effect.sleepFlips !== undefined) {
+      target.sleepFlips = effect.sleepFlips;
+    }
+    return state;
+  }
+
   if (effect instanceof UseStadiumEffect) {
     const player = effect.player;
     store.log(state, GameLog.LOG_PLAYER_USES_STADIUM, { name: player.name, stadium: effect.stadium.name });
@@ -172,6 +204,78 @@ export function gameReducer(store: StoreLike, state: State, effect: Effect): Sta
     effect.player.hand.moveCardTo(effect.pokemonCard, effect.target);
     effect.target.pokemonPlayedTurn = state.turn;
     effect.target.clearEffects();
+  }
+
+  if (effect instanceof MoveCardsEffect) {
+    const source = effect.source;
+    const destination = effect.destination;
+
+    // If source is a PokemonCardList, always clean up when moving cards
+    if (source instanceof PokemonCardList) {
+      source.clearEffects();
+      source.damage = 0;
+      source.specialConditions = [];
+      source.marker.markers = [];
+      source.tool = undefined;
+      source.removeBoardEffect(BoardEffect.ABILITY_USED);
+    }
+
+    // If specific cards are specified
+    if (effect.cards) {
+      if (source instanceof PokemonCardList) {
+        source.moveCardsTo(effect.cards, destination);
+        // Log the card movement
+        // effect.cards.forEach(card => {
+        //   store.log(state, GameLog.LOG_CARD_MOVED, { name: card.name, action: 'put', destination: 'destination' });
+        // });
+        if (effect.toBottom) {
+          destination.cards = [...destination.cards.slice(effect.cards.length), ...effect.cards];
+        } else if (effect.toTop) {
+          destination.cards = [...effect.cards, ...destination.cards];
+        }
+      } else {
+        source.moveCardsTo(effect.cards, destination);
+        // Log the card movement
+        // effect.cards.forEach(card => {
+        //   store.log(state, GameLog.LOG_CARD_MOVED, { name: card.name, action: 'put', destination: 'destination' });
+        // });
+        if (effect.toBottom) {
+          destination.cards = [...destination.cards.slice(effect.cards.length), ...effect.cards];
+        } else if (effect.toTop) {
+          destination.cards = [...effect.cards, ...destination.cards];
+        }
+      }
+    }
+    // If count is specified
+    else if (effect.count !== undefined) {
+      const cards = source.cards.slice(0, effect.count);
+      source.moveCardsTo(cards, destination);
+      // Log the card movement
+      // cards.forEach(card => {
+      //   store.log(state, GameLog.LOG_CARD_MOVED, { name: card.name, action: 'put', destination: 'destination' });
+      // });
+      if (effect.toBottom) {
+        destination.cards = [...destination.cards.slice(cards.length), ...cards];
+      } else if (effect.toTop) {
+        destination.cards = [...cards, ...destination.cards];
+      }
+    }
+    // Move all cards
+    else {
+      if (effect.toTop) {
+        source.moveToTopOfDestination(destination);
+      } else {
+        source.moveTo(destination);
+      }
+    }
+
+    // If source is a PokemonCardList and we moved all cards, discard remaining attached cards
+    if (source instanceof PokemonCardList && source.getPokemons().length === 0) {
+      const player = StateUtils.findOwner(state, source);
+      source.moveTo(player.discard);
+    }
+
+    return state;
   }
 
   return state;

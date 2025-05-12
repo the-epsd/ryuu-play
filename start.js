@@ -26,12 +26,12 @@ app.connectToDatabase()
   })
   .then(() => app.configureBotManager(botManager))
   .then(() => app.configureWebUi(config.backend.webUiDir))
-  .then(() => app.downloadMissingScans())
-  .catch(error => {
-    console.log('Unable to download image.');
-    console.error(error.message);
-    process.exit(1);
-  })
+  // .then(() => app.downloadMissingScans())
+  // .catch(error => {
+  //   console.log('Unable to download image.');
+  //   console.error(error.message);
+  //   process.exit(1);
+  // })
   .then(() => app.start())
   .then(() => {
     const address = config.backend.address;

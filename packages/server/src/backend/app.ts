@@ -3,7 +3,6 @@ import { json } from 'body-parser';
 
 import { Core } from '../game/core/core';
 import { BotManager } from '../game/bots/bot-manager';
-import { ScansDownloader } from './common/scans-downloader';
 import { Storage } from '../storage';
 import { WebSocketServer } from './socket/websocket-server';
 import { config } from '../config';
@@ -46,7 +45,7 @@ export class App {
       instance.init();
     };
 
-    app.use(json({limit: 512 + config.backend.avatarFileSize * 4}));
+    app.use(json({ limit: 512 + config.backend.avatarFileSize * 4 }));
     app.use(cors());
     define('/v1/avatars', Avatars);
     define('/v1/cards', Cards);
@@ -84,10 +83,10 @@ export class App {
     }
   }
 
-  public downloadMissingScans(): Promise<void> {
-    const scansDownloader = new ScansDownloader();
-    return scansDownloader.downloadAllMissingCards();
-  }
+  // public downloadMissingScans(): Promise<void> {
+  //   const scansDownloader = new ScansDownloader();
+  //   return scansDownloader.downloadAllMissingCards();
+  // }
 
   public start(): void {
     const address = config.backend.address;

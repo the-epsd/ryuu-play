@@ -7,6 +7,8 @@ import { CardInfoListPopupComponent } from './card-info-list-popup/card-info-lis
 import { CardInfoPaneAction } from './card-info-pane/card-info-pane.component';
 import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { SessionService } from '../session/session.service';
+import { HttpClient } from '@angular/common/http';
+import { map, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -15,12 +17,16 @@ export class CardsBaseService {
 
   private cards: Card[] = [];
   private names: string[] = [];
+  private customImages: { [key: string]: string } = {};
 
   constructor(
     private apiService: ApiService,
     private dialog: MatDialog,
-    private sessionService: SessionService
-  ) { }
+    private sessionService: SessionService,
+    private http: HttpClient
+  ) {
+    this.loadCustomImages();
+  }
 
   public setCards(cards: Card[]) {
     this.cards = cards;
@@ -71,14 +77,37 @@ export class CardsBaseService {
     return this.names;
   }
 
+  private loadCustomImages(): void {
+    const storedImages = localStorage.getItem('customCardImages');
+    if (storedImages) {
+      this.customImages = JSON.parse(storedImages);
+    }
+  }
+
   public getScanUrl(card: Card): string {
+    const fullCardIdentifier = `${card.set} ${card.setNumber}`;
+    const customUrl = this.customImages[fullCardIdentifier];
+    if (customUrl) {
+      return customUrl;
+    }
+
     const config = this.sessionService.session.config;
     const scansUrl = config && config.scansUrl || '';
-    const apiUrl = this.apiService.getApiUrl();
-    return apiUrl + scansUrl
-      .replace('{set}', card.set)
+    return scansUrl
+      .replace('{cardImage}', card.cardImage)
+      .replace('{setNumber}', card.setNumber)
       .replace('{name}', card.fullName);
   }
+
+  public setScanUrl(jsonUrl: string): Observable<void> {
+    return this.http.get(jsonUrl).pipe(
+      map((json: any) => {
+        this.customImages = json;
+        localStorage.setItem('customCardImages', JSON.stringify(this.customImages));
+      }),
+    );
+  }
+
 
   public getCardByName(cardName: string): Card | undefined {
     return this.cards.find(c => c.fullName === cardName);
