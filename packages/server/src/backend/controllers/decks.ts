@@ -15,7 +15,7 @@ export class Decks extends Controller {
     const userId: number = req.body.userId;
     const user = await User.findOne({ where: { id: userId }, relations: ['decks'] });
 
-    if (user === null) {
+    if (!user) {
       res.send({ error: ApiErrorEnum.PROFILE_INVALID });
       return;
     }
@@ -24,7 +24,10 @@ export class Decks extends Controller {
       id: deck.id,
       name: deck.name,
       isValid: deck.isValid,
-      cardTypes: JSON.parse(deck.cardTypes)
+      cards: JSON.parse(deck.cards),
+      cardTypes: JSON.parse(deck.cardTypes),
+      manualArchetype1: deck.manualArchetype1,
+      manualArchetype2: deck.manualArchetype2
     }));
 
     res.send({ ok: true, decks });
@@ -37,7 +40,7 @@ export class Decks extends Controller {
     const deckId: number = parseInt(req.params.id, 10);
     const entity = await Deck.findOne({ where: { id: deckId }, relations: ['user'] });
 
-    if (entity === null || entity.user.id !== userId) {
+    if (!entity || entity.user.id !== userId) {
       res.send({ error: ApiErrorEnum.DECK_INVALID });
       return;
     }
@@ -47,7 +50,9 @@ export class Decks extends Controller {
       name: entity.name,
       isValid: entity.isValid,
       cardTypes: JSON.parse(entity.cardTypes),
-      cards: JSON.parse(entity.cards)
+      cards: JSON.parse(entity.cards),
+      manualArchetype1: entity.manualArchetype1,
+      manualArchetype2: entity.manualArchetype2
     };
 
     res.send({ ok: true, deck });
@@ -62,14 +67,12 @@ export class Decks extends Controller {
   public async onSave(req: Request, res: Response) {
     const body: DeckSaveRequest = req.body;
 
-    // optional id parameter, without ID new deck will be created
     if (body.id !== undefined && typeof body.id !== 'number') {
       res.status(400);
       res.send({ error: ApiErrorEnum.VALIDATION_INVALID_PARAM, param: 'id' });
       return;
     }
 
-    // check if all cards exist in our database
     if (!this.validateCards(body.cards)) {
       res.status(400);
       res.send({ error: ApiErrorEnum.VALIDATION_INVALID_PARAM, param: 'cards' });
@@ -77,9 +80,9 @@ export class Decks extends Controller {
     }
 
     const userId: number = req.body.userId;
-    const user = await User.findOneById(userId);
+    const user = await User.findOne({ where: { id: userId } });
 
-    if (user === null) {
+    if (!user) {
       res.status(400);
       res.send({ error: ApiErrorEnum.PROFILE_INVALID });
       return;
@@ -89,7 +92,7 @@ export class Decks extends Controller {
       ? await Deck.findOne({ where: { id: body.id }, relations: ['user'] })
       : (() => { const d = new Deck(); d.user = user; return d; })();
 
-    if (deck === null || deck.user.id !== user.id) {
+    if (!deck || deck.user.id !== user.id) {
       res.status(400);
       res.send({ error: ApiErrorEnum.DECK_INVALID });
       return;
@@ -100,6 +103,8 @@ export class Decks extends Controller {
     deck.cards = JSON.stringify(body.cards);
     deck.isValid = deckUtils.isValid();
     deck.cardTypes = JSON.stringify(deckUtils.getDeckType());
+    deck.manualArchetype1 = body.manualArchetype1 || '';
+    deck.manualArchetype2 = body.manualArchetype2 || '';
 
     try {
       deck = await deck.save();
@@ -113,7 +118,9 @@ export class Decks extends Controller {
       ok: true, deck: {
         id: deck.id,
         name: deck.name,
-        cards: body.cards
+        cards: body.cards,
+        manualArchetype1: deck.manualArchetype1,
+        manualArchetype2: deck.manualArchetype2
       }
     });
   }
@@ -127,9 +134,9 @@ export class Decks extends Controller {
     const body: { id: number } = req.body;
 
     const userId: number = req.body.userId;
-    const user = await User.findOneById(userId);
+    const user = await User.findOne({ where: { id: userId } });
 
-    if (user === null) {
+    if (!user) {
       res.status(400);
       res.send({ error: ApiErrorEnum.PROFILE_INVALID });
       return;
@@ -137,7 +144,7 @@ export class Decks extends Controller {
 
     const deck = await Deck.findOne({ where: { id: body.id }, relations: ['user'] });
 
-    if (deck === null || deck.user.id !== user.id) {
+    if (!deck || deck.user.id !== user.id) {
       res.status(400);
       res.send({ error: ApiErrorEnum.DECK_INVALID });
       return;
@@ -158,9 +165,9 @@ export class Decks extends Controller {
     const body: { id: number, name: string } = req.body;
 
     const userId: number = req.body.userId;
-    const user = await User.findOneById(userId);
+    const user = await User.findOne({ where: { id: userId } });
 
-    if (user === null) {
+    if (!user) {
       res.status(400);
       res.send({ error: ApiErrorEnum.PROFILE_INVALID });
       return;
@@ -168,7 +175,7 @@ export class Decks extends Controller {
 
     let deck = await Deck.findOne({ where: { id: body.id }, relations: ['user'] });
 
-    if (deck === null || deck.user.id !== user.id) {
+    if (!deck || deck.user.id !== user.id) {
       res.status(400);
       res.send({ error: ApiErrorEnum.DECK_INVALID });
       return;
@@ -194,16 +201,15 @@ export class Decks extends Controller {
   @Post('/duplicate')
   @AuthToken()
   @Validate({
-    id: check().isNumber(),
-    name: check().minLength(3).maxLength(32),
+    id: check().isNumber()
   })
   public async onDuplicate(req: Request, res: Response) {
-    const body: any = req.body;
+    const body: { id: number } = req.body;
 
     const userId: number = req.body.userId;
-    const user = await User.findOneById(userId);
+    const user = await User.findOne({ where: { id: userId } });
 
-    if (user === null) {
+    if (!user) {
       res.status(400);
       res.send({ error: ApiErrorEnum.PROFILE_INVALID });
       return;
@@ -211,30 +217,40 @@ export class Decks extends Controller {
 
     const deck = await Deck.findOne({ where: { id: body.id }, relations: ['user'] });
 
-    if (deck === null || deck.user.id !== user.id) {
+    if (!deck || deck.user.id !== user.id) {
       res.status(400);
       res.send({ error: ApiErrorEnum.DECK_INVALID });
       return;
     }
 
-    delete body.id;
-    body.cards = JSON.parse(deck.cards);
-    return this.onSave(req, res);
+    const newDeck = new Deck();
+    newDeck.user = user;
+    newDeck.name = deck.name + ' (copy)';
+    newDeck.cards = deck.cards;
+    newDeck.isValid = deck.isValid;
+    newDeck.cardTypes = deck.cardTypes;
+    newDeck.manualArchetype1 = deck.manualArchetype1;
+    newDeck.manualArchetype2 = deck.manualArchetype2;
+
+    try {
+      await newDeck.save();
+    } catch (error) {
+      res.status(400);
+      res.send({ error: ApiErrorEnum.NAME_DUPLICATE });
+      return;
+    }
+
+    res.send({
+      ok: true, deck: {
+        id: newDeck.id,
+        name: newDeck.name
+      }
+    });
   }
 
   private validateCards(deck: string[]) {
-    if (!(deck instanceof Array)) {
-      return false;
-    }
-
     const cardManager = CardManager.getInstance();
-    for (let i = 0; i < deck.length; i++) {
-      if (typeof deck[i] !== 'string' || !cardManager.isCardDefined(deck[i])) {
-        return false;
-      }
-    }
-
-    return true;
+    return deck.every(cardId => cardManager.isCardDefined(cardId));
   }
 
 }

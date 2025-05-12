@@ -29,6 +29,14 @@
         </td>
       </ng-container>
 
+      <!-- Archetype -->
+      <ng-container matColumnDef="archetype">
+        <th mat-header-cell *matHeaderCellDef translate>DECK_ARCHETYPE</th>
+        <td mat-cell *matCellDef="let deck">
+          <ptcg-archetype [class]="getArchetype(deck)"></ptcg-archetype>
+        </td>
+      </ng-container>
+
       <!-- Is valid -->
       <ng-container matColumnDef="isValid">
         <th mat-header-cell *matHeaderCellDef translate>DECK_VALID</th>

@@ -10,11 +10,13 @@ import { DeckCardComponent } from './deck-card/deck-card.component';
 import { DeckEditPanesComponent } from './deck-edit-panes/deck-edit-panes.component';
 import { DeckEditInfoComponent } from './deck-edit-info/deck-edit-info.component';
 import { ImportDeckPopupComponent } from './import-deck-popup/import-deck-popup.component';
+import { ArchetypeComponent } from '../shared/cards/archetype/archetype.component';
 
 @NgModule({
     imports: [
         ScrollingModule,
-        SharedModule
+        SharedModule,
+        ArchetypeComponent
     ],
     declarations: [
         DeckCardComponent,

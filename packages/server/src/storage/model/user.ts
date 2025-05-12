@@ -24,6 +24,9 @@ export class User extends BaseEntity {
   @Column()
   public password: string = '';
 
+  @Column({ type: 'int', default: 0 })
+  public roleId: number = 0;
+
   @Column({ type: 'bigint', transformer: [bigint] })
   public registered: number = 0;
 
@@ -61,5 +64,4 @@ export class User extends BaseEntity {
     await User.update(this.id, { lastSeen: this.lastSeen });
     return this;
   }
-
 }
