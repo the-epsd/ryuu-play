@@ -1,5 +1,5 @@
 export const environment = {
-  apiUrl: process.env.API_URL || 'https://localhost:12021',
+  apiUrl: process.env.API_URL || '/api',
   timeout: 5000,
   production: true,
   apiVersion: 2,

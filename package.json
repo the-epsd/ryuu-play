@@ -21,5 +21,8 @@
     "@ptcg/server": "*",
     "@ptcg/sets": "*",
     "dotenv": "^16.5.0"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }
