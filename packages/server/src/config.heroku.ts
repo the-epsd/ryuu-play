@@ -7,7 +7,7 @@ export const config = {
     address: '0.0.0.0',
     port: process.env.PORT ? parseInt(process.env.PORT) : 12021,
     avatarsDir: process.env.AVATARS_DIR || '/tmp/avatars',
-    webUiDir: process.env.WEB_UI_DIR || '/app/packages/play/dist/play',
+    webUiDir: process.env.WEB_UI_DIR || '/app/packages/play/dist/ptcg-play',
     allowCors: true,
     secret: process.env.SECRET_KEY || '!secret!'
   },
