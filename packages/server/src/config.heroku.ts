@@ -7,7 +7,7 @@ export const config = {
     address: '0.0.0.0',
     port: process.env.PORT ? parseInt(process.env.PORT) : 12021,
     avatarsDir: process.env.AVATARS_DIR || '/tmp/avatars',
-    webUiDir: process.env.WEB_UI_DIR || '/app/packages/play/dist/ptcg-play',
+    webUiDir: process.env.WEB_UI_DIR || 'packages/play/dist/ptcg-play',
     allowCors: true,
     secret: process.env.SECRET_KEY || '!secret!'
   },
@@ -22,7 +22,7 @@ export const config = {
   sets: {
     ...baseConfig.sets,
     scansDir: process.env.SCANS_DIR || '/tmp/scans',
-    scansDownloadUrl: process.env.SCANS_DOWNLOAD_URL || 'https://your-app-name.herokuapp.com/scans'
+    scansDownloadUrl: process.env.SCANS_DOWNLOAD_URL || 'https://twinleaf.herokuapp.com/scans'
   },
   email: {
     transporter: {
