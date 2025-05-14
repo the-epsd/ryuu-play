@@ -43,6 +43,7 @@ export * from './prompts/put-damage-prompt';
 export * from './prompts/select-prompt';
 export * from './prompts/show-cards-prompt';
 export * from './prompts/shuffle-prompt';
+export * from './prompts/confirm-cards-prompt';
 
 export * from './state/card-list';
 export * from './state/card-marker';
