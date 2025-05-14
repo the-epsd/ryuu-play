@@ -1,4 +1,4 @@
-import { TrainerCard, TrainerType, StoreLike, State, Effect, TrainerEffect, StateUtils, GameError, GameMessage, ShuffleDeckPrompt } from '@ptcg/common';
+import { TrainerCard, TrainerType, StoreLike, State, Effect, TrainerEffect, StateUtils, GameError, GameMessage, ShuffleDeckPrompt, MOVE_CARDS } from '@ptcg/common';
 
 export class AceTrainer extends TrainerCard {
 
@@ -28,7 +28,7 @@ export class AceTrainer extends TrainerCard {
       const cards = player.hand.cards.filter(c => c !== this);
 
       player.hand.moveCardsTo(cards, player.deck);
-      opponent.hand.moveTo(opponent.deck);
+      MOVE_CARDS(store, state, opponent.hand, opponent.deck);
 
       store.prompt(state, [
         new ShuffleDeckPrompt(player.id),
@@ -37,12 +37,10 @@ export class AceTrainer extends TrainerCard {
         player.deck.applyOrder(deckOrder[0]);
         opponent.deck.applyOrder(deckOrder[1]);
 
-        player.deck.moveTo(player.hand, 6);
-        opponent.deck.moveTo(opponent.hand, 3);
+        MOVE_CARDS(store, state, player.deck, player.hand, { count: 6 });
+        MOVE_CARDS(store, state, opponent.deck, opponent.hand, { count: 3 });
       });
     }
-
     return state;
   }
-
 }

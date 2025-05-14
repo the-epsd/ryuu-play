@@ -64,7 +64,7 @@ export class AppComponent implements OnInit {
         if (!connected && this.isLoggedIn) {
           this.socketService.disable();
           this.dialog.closeAll();
-          await this.alertService.alert(this.translate.instant('ERROR_DISCONNECTED_FROM_SERVER'));
+          this.alertService.toast(this.translate.instant('ERROR_DISCONNECTED_FROM_SERVER'));
           this.sessionService.clear();
           this.router.navigate(['/login']);
         }

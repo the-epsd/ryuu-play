@@ -1,4 +1,4 @@
-import { StoreLike, State, Effect, CardList, GameError, GameMessage, TrainerCard, TrainerEffect, TrainerType, ConfirmCardsPrompt } from '@ptcg/common';
+import { StoreLike, State, Effect, CardList, GameError, GameMessage, TrainerCard, TrainerEffect, TrainerType, ConfirmCardsPrompt, MOVE_CARDS } from '@ptcg/common';
 
 export class TrekkingShoes extends TrainerCard {
 
@@ -31,29 +31,27 @@ export class TrekkingShoes extends TrainerCard {
       // We will discard this card after prompt confirmation
       effect.preventDefault = true;
 
+      // Look at top card
       const deckTop = new CardList();
-      player.deck.moveTo(deckTop, 1);
+      MOVE_CARDS(store, state, player.deck, deckTop, { count: 1 });
 
       return store.prompt(state, new ConfirmCardsPrompt(
         player.id,
         GameMessage.TREKKING_SHOES,
-        deckTop.cards, // Fix error by changing toArray() to cards
-        { allowCancel: true },
+        deckTop.cards,
+        { allowCancel: true }
       ), selected => {
-
         if (selected !== null) {
           // Add card to hand
-          deckTop.moveCardsTo(deckTop.cards, player.hand);
-          player.supporter.moveCardTo(effect.trainerCard, player.discard);
+          MOVE_CARDS(store, state, deckTop, player.hand);
         } else {
-
-          // Discard card
-          deckTop.moveTo(player.discard);
-
-          // Draw a card
-          player.deck.moveTo(player.hand, 1);
-          player.supporter.moveCardTo(effect.trainerCard, player.discard);
+          // Discard card and draw a new one
+          MOVE_CARDS(store, state, deckTop, player.discard);
+          MOVE_CARDS(store, state, player.deck, player.hand, { count: 1 });
         }
+
+        // Discard Trekking Shoes
+        MOVE_CARDS(store, state, player.supporter, player.discard, { cards: [effect.trainerCard] });
       });
     }
     return state;

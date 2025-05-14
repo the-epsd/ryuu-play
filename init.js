@@ -51,6 +51,7 @@ const sets = require('@ptcg/sets');
 const cardManager = CardManager.getInstance();
 cardManager.defineSet(sets.setAncientOrigins);
 cardManager.defineSet(sets.setArceus);
+cardManager.defineSet(sets.setAstralRadiance);
 cardManager.defineSet(sets.setScarletAndVioletEnergy);
 // Define bots
 const botManager = BotManager.getInstance();

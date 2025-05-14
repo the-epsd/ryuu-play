@@ -1,4 +1,4 @@
-import { PokemonCard, Stage, CardType, PowerType, StoreLike, State, Effect, StateUtils, GameMessage, GameError, CardList, OrderCardsPrompt, SelectPrompt, EffectOfAbilityEffect, WAS_ATTACK_USED } from '@ptcg/common';
+import { PokemonCard, Stage, CardType, PowerType, StoreLike, State, Effect, StateUtils, GameMessage, GameError, CardList, OrderCardsPrompt, SelectPrompt, EffectOfAbilityEffect, WAS_ATTACK_USED, MOVE_CARDS } from '@ptcg/common';
 
 export class Baltoy extends PokemonCard {
   public stage: Stage = Stage.BASIC;
@@ -50,7 +50,7 @@ export class Baltoy extends PokemonCard {
             }
 
             const deckTop = new CardList();
-            player.deck.moveTo(deckTop, 3);
+            MOVE_CARDS(store, state, player.deck, deckTop, { count: 3 });
 
             return store.prompt(state, new OrderCardsPrompt(
               player.id,
@@ -63,10 +63,9 @@ export class Baltoy extends PokemonCard {
               }
 
               deckTop.applyOrder(order);
-              deckTop.moveToTopOfDestination(player.deck);
+              MOVE_CARDS(store, state, deckTop, player.deck, { toTop: true });
 
             });
-
           }
         },
         {
@@ -77,7 +76,7 @@ export class Baltoy extends PokemonCard {
             }
 
             const deckTop = new CardList();
-            opponent.deck.moveTo(deckTop, 3);
+            MOVE_CARDS(store, state, opponent.deck, deckTop, { count: 3 });
 
             return store.prompt(state, new OrderCardsPrompt(
               player.id,
@@ -90,7 +89,7 @@ export class Baltoy extends PokemonCard {
               }
 
               deckTop.applyOrder(order);
-              deckTop.moveToTopOfDestination(opponent.deck);
+              MOVE_CARDS(store, state, deckTop, opponent.deck, { toTop: true });
 
             });
 

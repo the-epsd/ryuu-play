@@ -1,4 +1,4 @@
-import { StoreLike, State, Effect, EndTurnEffect, GameError, GameLog, GameMessage, ShuffleDeckPrompt, StateUtils, TrainerCard, TrainerType, UseStadiumEffect } from '@ptcg/common';
+import { StoreLike, State, Effect, EndTurnEffect, GameError, GameLog, GameMessage, ShuffleDeckPrompt, StateUtils, TrainerCard, TrainerType, UseStadiumEffect, MOVE_CARDS } from '@ptcg/common';
 
 export class JubilifeVillage extends TrainerCard {
 
@@ -28,13 +28,13 @@ export class JubilifeVillage extends TrainerCard {
       }
 
       const cards = player.hand.cards.filter(c => c !== this);
-      player.hand.moveCardsTo(cards, player.deck);
+      MOVE_CARDS(store, state, player.hand, player.deck, { cards: cards });
 
       state = store.prompt(state, new ShuffleDeckPrompt(player.id), order => {
         player.deck.applyOrder(order);
       });
 
-      player.deck.moveTo(player.hand, 5);
+      MOVE_CARDS(store, state, player.deck, player.hand, { count: 5 });
 
       effect.preventDefault = true;
       store.log(state, GameLog.LOG_PLAYER_USES_STADIUM, { name: player.name, stadium: effect.stadium.name });

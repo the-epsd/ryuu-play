@@ -1,4 +1,4 @@
-import { StoreLike, State, Effect, Card, CardList, ChooseCardsPrompt, CoinFlipPrompt, GameError, GameMessage, OrderCardsPrompt, ShowCardsPrompt, StateUtils, TrainerCard, TrainerEffect, TrainerToDeckEffect, TrainerType } from '@ptcg/common';
+import { StoreLike, State, Effect, CardList, ChooseCardsPrompt, CoinFlipPrompt, GameError, GameMessage, OrderCardsPrompt, ShowCardsPrompt, StateUtils, TrainerCard, TrainerEffect, TrainerToDeckEffect, TrainerType, MOVE_CARDS } from '@ptcg/common';
 
 export class Cyllene extends TrainerCard {
 
@@ -17,15 +17,14 @@ export class Cyllene extends TrainerCard {
   public fullName: string = 'Cyllene ASR';
 
   public text: string =
-    'Flip 2 coins. Put a number of cards up to the number of heads from your discard pile on top of your deck in any order.';
+    'Flip 2 coins. For each heads, put a card from your discard pile on top of your deck. ' +
+    'If you put any Trainer cards there this way, your opponent may prevent this effect. ' +
+    'If they do, put those Trainer cards back into your discard pile.';
 
   public reduceEffect(store: StoreLike, state: State, effect: Effect): State {
     if (effect instanceof TrainerEffect && effect.trainerCard === this) {
-
       const player = effect.player;
       const opponent = StateUtils.getOpponent(state, player);
-
-      let cards: Card[] = [];
 
       if (player.deck.cards.length === 0) {
         throw new GameError(GameMessage.CANNOT_PLAY_THIS_CARD);
@@ -37,8 +36,7 @@ export class Cyllene extends TrainerCard {
         throw new GameError(GameMessage.SUPPORTER_ALREADY_PLAYED);
       }
 
-      player.hand.moveCardTo(effect.trainerCard, player.supporter);
-      // We will discard this card after prompt confirmation
+      MOVE_CARDS(store, state, player.hand, player.supporter, { cards: [effect.trainerCard] });
       effect.preventDefault = true;
 
       let heads: number = 0;
@@ -49,7 +47,7 @@ export class Cyllene extends TrainerCard {
         results.forEach(r => { heads += r ? 1 : 0; });
 
         if (heads === 0) {
-          player.supporter.moveCardTo(effect.trainerCard, player.discard);
+          MOVE_CARDS(store, state, player.supporter, player.discard, { cards: [effect.trainerCard] });
           return state;
         }
 
@@ -62,7 +60,7 @@ export class Cyllene extends TrainerCard {
           {},
           { min: Math.min(heads, player.discard.cards.length), max: heads, allowCancel: false }
         ), selected => {
-          cards = selected || [];
+          const cards = selected || [];
 
           const trainerCards = cards.filter(card => card instanceof TrainerCard);
           const nonTrainerCards = cards.filter(card => !(card instanceof TrainerCard));
@@ -77,9 +75,7 @@ export class Cyllene extends TrainerCard {
           const cardsToMove = canMoveTrainerCards ? cards : nonTrainerCards;
 
           if (cardsToMove.length > 0) {
-            cardsToMove.forEach(card => {
-              player.discard.moveCardTo(card, deckTop);
-            });
+            MOVE_CARDS(store, state, player.discard, deckTop, { cards: cardsToMove });
 
             return store.prompt(state, new OrderCardsPrompt(
               player.id,
@@ -92,8 +88,8 @@ export class Cyllene extends TrainerCard {
               }
 
               deckTop.applyOrder(order);
-              deckTop.moveToTopOfDestination(player.deck);
-              player.supporter.moveCardTo(effect.trainerCard, player.discard);
+              MOVE_CARDS(store, state, deckTop, player.deck, { toTop: true });
+              MOVE_CARDS(store, state, player.supporter, player.discard, { cards: [effect.trainerCard] });
 
               if (cardsToMove.length > 0) {
                 return store.prompt(state, new ShowCardsPrompt(
@@ -106,8 +102,7 @@ export class Cyllene extends TrainerCard {
               return state;
             });
           }
-
-          player.supporter.moveCardTo(effect.trainerCard, player.discard);
+          MOVE_CARDS(store, state, player.supporter, player.discard, { cards: [effect.trainerCard] });
           return state;
         });
       });

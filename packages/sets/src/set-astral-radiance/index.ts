@@ -1,4 +1,4 @@
-import { Card } from '../../game/store/card/card';
+import { Card } from '@ptcg/common';
 import { Absol } from './absol';
 import { Adaman } from './adaman';
 import { Bronzor } from './bronzor';

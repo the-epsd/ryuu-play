@@ -1,4 +1,4 @@
-import { PokemonCard, Stage, CardType, PowerType, StoreLike, State, Effect, PowerEffect, StateUtils, PokemonCardList, GameError, GameMessage } from '@ptcg/common';
+import { PokemonCard, Stage, CardType, PowerType, StoreLike, State, Effect, PowerEffect, StateUtils, PokemonCardList, GameError, GameMessage, MOVE_CARDS } from '@ptcg/common';
 
 export class Unown extends PokemonCard {
 
@@ -43,10 +43,10 @@ export class Unown extends PokemonCard {
   public reduceEffect(store: StoreLike, state: State, effect: Effect): State {
     if (effect instanceof PowerEffect && effect.power === this.powers[0]) {
       const player = effect.player;
-      const cardList = StateUtils.findCardList(state, this);
+      const cardList = StateUtils.findCardList(state, this) as PokemonCardList;
 
       // check if UnownR is on player's Bench
-      const benchIndex = player.bench.indexOf(cardList as PokemonCardList);
+      const benchIndex = player.bench.indexOf(cardList);
       if (benchIndex === -1) {
         throw new GameError(GameMessage.CANNOT_USE_POWER);
       }
@@ -55,13 +55,23 @@ export class Unown extends PokemonCard {
         throw new GameError(GameMessage.CANNOT_USE_POWER);
       }
 
-      player.bench[benchIndex].moveTo(player.discard);
-      player.bench[benchIndex].clearEffects();
-      player.deck.moveTo(player.hand, 1);
+      const pokemons = cardList.getPokemons();
+      const otherCards = cardList.cards.filter(card => !(card instanceof PokemonCard));
+
+      // Move other cards to discard
+      if (otherCards.length > 0) {
+        MOVE_CARDS(store, state, cardList, player.discard, { cards: otherCards });
+      }
+
+      // Move Pokémon to discard
+      if (pokemons.length > 0) {
+        MOVE_CARDS(store, state, cardList, player.discard, { cards: pokemons });
+      }
+
+      cardList.clearEffects();
+      MOVE_CARDS(store, state, player.deck, player.hand, { count: 1 });
       return state;
     }
-
     return state;
   }
-
 }

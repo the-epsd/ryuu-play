@@ -1,4 +1,4 @@
-import { StoreLike, State, Effect, CardType, PokemonCard, Stage } from '@ptcg/common';
+import { CardType, PokemonCard, Stage } from '@ptcg/common';
 
 export class Yanma extends PokemonCard {
   public stage: Stage = Stage.BASIC;

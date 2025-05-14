@@ -1,4 +1,4 @@
-import { StoreLike, State, Effect, BoardEffect, CardType, EndTurnEffect, GameError, GameMessage, PlayerType, PlayPokemonEffect, PokemonCard, PowerEffect, PowerType, Stage } from '@ptcg/common';
+import { StoreLike, State, Effect, BoardEffect, CardType, EndTurnEffect, GameError, GameMessage, PlayerType, PlayPokemonEffect, PokemonCard, PowerEffect, PowerType, Stage, MOVE_CARDS } from '@ptcg/common';
 
 export class Regidrago extends PokemonCard {
 
@@ -81,11 +81,10 @@ export class Regidrago extends PokemonCard {
           if (player.deck.cards.length === 0) {
             break;
           }
-          player.deck.moveTo(player.hand, 1);
+          MOVE_CARDS(store, state, player.deck, player.hand, { count: 1 });
         }
       }
     }
-
     return state;
   }
 }

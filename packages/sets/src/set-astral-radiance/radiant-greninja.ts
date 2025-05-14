@@ -1,4 +1,4 @@
-import { StoreLike, State, Effect, AttackEffect, BoardEffect, Card, CardTag, CardType, CheckProvidedEnergyEffect, ChooseCardsPrompt, ChooseEnergyPrompt, ChoosePokemonPrompt, DiscardCardsEffect, EndTurnEffect, EnergyCard, GameError, GameMessage, PlayerType, PlayPokemonEffect, PokemonCard, PowerEffect, PowerType, PutDamageEffect, SlotType, Stage, SuperType } from '@ptcg/common';
+import { StoreLike, State, Effect, AttackEffect, BoardEffect, Card, CardTag, CardType, CheckProvidedEnergyEffect, ChooseCardsPrompt, ChooseEnergyPrompt, ChoosePokemonPrompt, DiscardCardsEffect, EndTurnEffect, EnergyCard, GameError, GameMessage, PlayerType, PlayPokemonEffect, PokemonCard, PowerEffect, PowerType, PutDamageEffect, SlotType, Stage, SuperType, MOVE_CARDS } from '@ptcg/common';
 
 export class RadiantGreninja extends PokemonCard {
 
@@ -95,8 +95,8 @@ export class RadiantGreninja extends PokemonCard {
           }
         });
 
-        player.hand.moveCardsTo(cards, player.discard);
-        player.deck.moveTo(player.hand, 2);
+        MOVE_CARDS(store, state, player.hand, player.discard, { cards: cards });
+        MOVE_CARDS(store, state, player.deck, player.hand, { count: 2 });
       });
       return state;
     }

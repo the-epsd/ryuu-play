@@ -1,4 +1,4 @@
-import { StoreLike, State, Effect, CardList, ChooseCardsPrompt, GameLog, GameMessage, ShowCardsPrompt, ShuffleDeckPrompt, StateUtils, SuperType, TrainerCard, TrainerEffect, TrainerType } from '@ptcg/common';
+import { StoreLike, State, Effect, CardList, ChooseCardsPrompt, GameLog, GameMessage, ShowCardsPrompt, ShuffleDeckPrompt, StateUtils, SuperType, TrainerCard, TrainerEffect, TrainerType, MOVE_CARDS } from '@ptcg/common';
 
 export class EnergyLoto extends TrainerCard {
 
@@ -30,7 +30,7 @@ export class EnergyLoto extends TrainerCard {
       // We will discard this card after prompt confirmation
       effect.preventDefault = true;
 
-      player.deck.moveTo(temp, 7);
+      MOVE_CARDS(store, state, player.deck, temp, { count: 7 });
 
       return store.prompt(state, new ChooseCardsPrompt(
         player,
@@ -40,20 +40,18 @@ export class EnergyLoto extends TrainerCard {
         { allowCancel: false, min: 0, max: 1 }
       ), chosenCards => {
 
-        if (chosenCards.length == 0) {
+        if (chosenCards.length === 0) {
           // No Energy chosen, shuffle all back
-          temp.cards.forEach(card => {
-            temp.moveCardTo(card, player.deck);
-          });
-          player.supporter.moveCardTo(this, player.discard);
+          MOVE_CARDS(store, state, temp, player.deck);
+          MOVE_CARDS(store, state, player.supporter, player.discard, { cards: [this] });
         }
 
         if (chosenCards.length > 0) {
           // Move chosen Energy to hand
           const energyCard = chosenCards[0];
-          temp.moveCardTo(energyCard, player.hand);
-          player.supporter.moveCardTo(this, player.discard);
-          temp.moveTo(player.deck);
+          MOVE_CARDS(store, state, temp, player.hand, { cards: [energyCard] });
+          MOVE_CARDS(store, state, player.supporter, player.discard, { cards: [this] });
+          MOVE_CARDS(store, state, temp, player.deck);
 
           chosenCards.forEach((card, index) => {
             store.log(state, GameLog.LOG_PLAYER_PUTS_CARD_IN_HAND, { name: player.name, card: card.name });
@@ -66,7 +64,7 @@ export class EnergyLoto extends TrainerCard {
               chosenCards), () => state);
           }
         }
-        player.supporter.moveCardTo(this, player.discard);
+        MOVE_CARDS(store, state, player.supporter, player.discard, { cards: [this] });
 
         return store.prompt(state, new ShuffleDeckPrompt(player.id), order => {
           player.deck.applyOrder(order);

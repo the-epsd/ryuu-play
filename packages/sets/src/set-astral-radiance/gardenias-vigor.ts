@@ -1,4 +1,4 @@
-import { StoreLike, State, Effect, AttachEnergyEffect, AttachEnergyPrompt, EnergyCard, EnergyType, GameError, GameMessage, PlayerType, SlotType, StateUtils, SuperType, TrainerCard, TrainerEffect, TrainerType } from '@ptcg/common';
+import { StoreLike, State, Effect, AttachEnergyEffect, AttachEnergyPrompt, EnergyCard, EnergyType, GameError, GameMessage, PlayerType, SlotType, StateUtils, SuperType, TrainerCard, TrainerEffect, TrainerType, MOVE_CARDS } from '@ptcg/common';
 
 export class GardeniasVigor extends TrainerCard {
   public trainerType: TrainerType = TrainerType.SUPPORTER;
@@ -37,7 +37,7 @@ export class GardeniasVigor extends TrainerCard {
       // We will discard this card after prompt confirmation
       effect.preventDefault = true;
 
-      player.deck.moveTo(player.hand, 2);
+      MOVE_CARDS(store, state, player.deck, player.hand, { count: 2 });
 
       // const hasEnergyInHand = player.hand.cards.some(c => {
       //   return c instanceof EnergyCard
@@ -63,7 +63,7 @@ export class GardeniasVigor extends TrainerCard {
           const energyCard = transfer.card as EnergyCard;
           const attachEnergyEffect = new AttachEnergyEffect(player, energyCard, target);
           store.reduceEffect(state, attachEnergyEffect);
-          player.supporter.moveCardTo(effect.trainerCard, player.discard);
+          MOVE_CARDS(store, state, player.supporter, player.discard, { cards: [effect.trainerCard] });
 
         }
       });

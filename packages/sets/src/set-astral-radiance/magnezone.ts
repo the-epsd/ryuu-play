@@ -1,4 +1,4 @@
-import { StoreLike, State, Effect, AttachEnergyPrompt, BoardEffect, CardList, CardType, EndTurnEffect, EnergyCard, GameError, GameMessage, PlayerType, PokemonCard, PowerEffect, PowerType, ShowCardsPrompt, ShuffleDeckPrompt, SlotType, Stage, StateUtils, SuperType } from '@ptcg/common';
+import { StoreLike, State, Effect, AttachEnergyPrompt, BoardEffect, CardList, CardType, EndTurnEffect, EnergyCard, GameError, GameMessage, PlayerType, PokemonCard, PowerEffect, PowerType, ShowCardsPrompt, ShuffleDeckPrompt, SlotType, Stage, StateUtils, SuperType, MOVE_CARDS } from '@ptcg/common';
 
 export class Magnezone extends PokemonCard {
 
@@ -59,12 +59,12 @@ export class Magnezone extends PokemonCard {
         throw new GameError(GameMessage.POWER_ALREADY_USED);
       }
 
-      if (player.deck.cards.length == 0) {
+      if (player.deck.cards.length === 0) {
         throw new GameError(GameMessage.CANNOT_USE_POWER);
       }
 
       // Look at top 6 cards
-      player.deck.moveTo(temp, 6);
+      MOVE_CARDS(store, state, player.deck, temp, { count: 6 });
 
       // Filter for Metal Energy cards
       const metalEnergyCards = temp.cards.filter(card =>
@@ -73,14 +73,13 @@ export class Magnezone extends PokemonCard {
       );
 
       if (metalEnergyCards.length === 0) {
-        // If no Metal Energy found, return all cards to deck and shuffle
-        // Show the cards to the player first
+        // If no Metal Energy found, show cards and return to deck
         return store.prompt(state, new ShowCardsPrompt(
           player.id,
           GameMessage.CARDS,
           temp.cards
         ), () => {
-          temp.moveTo(player.deck);
+          MOVE_CARDS(store, state, temp, player.deck);
           return store.prompt(state, new ShuffleDeckPrompt(player.id), order => {
             player.deck.applyOrder(order);
             return state;
@@ -102,10 +101,11 @@ export class Magnezone extends PokemonCard {
           // Attach selected energy cards
           for (const transfer of transfers) {
             const target = StateUtils.getTarget(state, player, transfer.to);
-            temp.moveCardTo(transfer.card, target);
+            MOVE_CARDS(store, state, temp, target, { cards: [transfer.card] });
           }
         }
 
+        // Add marker and board effect
         player.marker.addMarker(this.GIGA_MAGNET_MARKER, this);
         player.forEachPokemon(PlayerType.BOTTOM_PLAYER, cardList => {
           if (cardList.getPokemonCard() === this) {
@@ -114,7 +114,7 @@ export class Magnezone extends PokemonCard {
         });
 
         // Return remaining cards to deck and shuffle
-        temp.moveTo(player.deck);
+        MOVE_CARDS(store, state, temp, player.deck);
         return store.prompt(state, new ShuffleDeckPrompt(player.id), order => {
           player.deck.applyOrder(order);
           return state;
