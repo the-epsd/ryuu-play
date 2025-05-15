@@ -3,17 +3,16 @@ import * as path from 'path';
 
 const isHeroku = process.env.NODE_ENV === 'production' && process.env.DYNO;
 
-export const config = {
-  ...baseConfig,
+// Create a new config object with the Heroku-specific settings
+const herokuConfig = {
   backend: {
     ...baseConfig.backend,
     address: '0.0.0.0',
     port: process.env.PORT ? parseInt(process.env.PORT) : 12021,
     avatarsDir: process.env.AVATARS_DIR || '/tmp/avatars',
     webUiDir: process.env.WEB_UI_DIR || (isHeroku
-      ? '/app/packages/play/dist'
+      ? '/app/packages/play/dist/ptcg-play'
       : path.resolve(__dirname, '../../../play/dist')),
-
     allowCors: true,
     secret: process.env.SECRET_KEY || '!secret!'
   },
@@ -39,5 +38,23 @@ export const config = {
     sender: process.env.EMAIL_SENDER || 'noreply@ryuuplay.com',
     appName: 'RyuuPlay',
     publicAddress: process.env.PUBLIC_URL || 'https://twinleaf.herokuapp.com'
+  }
+};
+
+// Merge the configs
+export const config = {
+  ...baseConfig,
+  ...herokuConfig,
+  backend: {
+    ...baseConfig.backend,
+    ...herokuConfig.backend
+  },
+  sets: {
+    ...baseConfig.sets,
+    ...herokuConfig.sets
+  },
+  email: {
+    ...baseConfig.email,
+    ...herokuConfig.email
   }
 }; 
