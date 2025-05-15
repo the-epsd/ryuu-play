@@ -11,8 +11,8 @@ export const config = {
     port: process.env.PORT ? parseInt(process.env.PORT) : 12021,
     avatarsDir: process.env.AVATARS_DIR || '/tmp/avatars',
     webUiDir: process.env.WEB_UI_DIR || (isHeroku
-      ? '/app/packages/play/dist/ptcg-play'
-      : path.resolve(__dirname, '../../../play/dist/ptcg-play')),
+      ? '/app/packages/play/dist'
+      : path.resolve(__dirname, '../../../play/dist')),
 
     allowCors: true,
     secret: process.env.SECRET_KEY || '!secret!'
