@@ -1,4 +1,4 @@
-import * as express from 'express';
+import express from 'express';
 import { json } from 'body-parser';
 
 import { Core } from '../game/core/core';

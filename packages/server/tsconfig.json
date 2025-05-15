@@ -1,7 +1,8 @@
 {
   "extends": "../common/tsconfig",
   "compilerOptions": {
-    "outDir": "dist/cjs"
+    "outDir": "dist/cjs",
+    "esModuleInterop": true,
   },
   "include": [
     "src/**/*.ts"

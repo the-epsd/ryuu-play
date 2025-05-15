@@ -1,4 +1,5 @@
 import { config as baseConfig } from './config';
+import * as path from 'path';
 
 export const config = {
   ...baseConfig,
@@ -7,7 +8,7 @@ export const config = {
     address: '0.0.0.0',
     port: process.env.PORT ? parseInt(process.env.PORT) : 12021,
     avatarsDir: process.env.AVATARS_DIR || '/tmp/avatars',
-    webUiDir: process.env.WEB_UI_DIR || 'packages/play/dist/ptcg-play',
+    webUiDir: process.env.WEB_UI_DIR || path.resolve(__dirname, '../../../play/dist/ptcg-play'),
     allowCors: true,
     secret: process.env.SECRET_KEY || '!secret!'
   },
