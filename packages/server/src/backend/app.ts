@@ -88,10 +88,30 @@ export class App {
 
   public configureWebUi(absolutePath: string): void {
     if (absolutePath) {
-      // Ensure the web UI directory exists
-      fs.mkdirSync(absolutePath, { recursive: true });
-      this.app.use(express.static(absolutePath));
-      this.app.use('*', (req, res) => res.sendFile(path.join(absolutePath, 'index.html')));
+      const resolvedPath = path.resolve(absolutePath);
+      console.log('Configuring web UI from:', resolvedPath);
+
+      // Check if directory exists
+      if (!fs.existsSync(resolvedPath)) {
+        console.error('Web UI directory does not exist:', resolvedPath);
+        return;
+      }
+
+      // Check if index.html exists
+      const indexPath = path.join(resolvedPath, 'index.html');
+      if (!fs.existsSync(indexPath)) {
+        console.error('index.html not found in:', resolvedPath);
+        return;
+      }
+
+      console.log('Serving static files from:', resolvedPath);
+      this.app.use(express.static(resolvedPath));
+
+      // Serve index.html for all routes
+      this.app.use('*', (req, res) => {
+        console.log('Serving index.html for route:', req.originalUrl);
+        res.sendFile(indexPath);
+      });
     }
   }
 
