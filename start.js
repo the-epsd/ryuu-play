@@ -4,7 +4,7 @@ const { mkdirSync } = require('node:fs');
 
 // Use Heroku config in production
 if (process.env.NODE_ENV === 'production') {
-  require('./packages/server/src/config.heroku');
+  require('./packages/server/dist/cjs/config.heroku');
 } else {
   // Search for the argument with init script (like "--init=./init.js")
   require((process.argv.find(arg => arg.startsWith('--init=')) || '--init=./init.js')
