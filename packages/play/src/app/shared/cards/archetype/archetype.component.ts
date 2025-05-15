@@ -1,12 +1,14 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, Input } from "@angular/core";
 import { Archetype } from "@ptcg/common";
+import { CommonModule } from "@angular/common";
 
 @Component({
   standalone: true,
   selector: 'ptcg-archetype',
   templateUrl: './archetype.component.html',
   styleUrls: ['./archetype.component.scss'],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  imports: [CommonModule]
 })
 export class ArchetypeComponent {
   public archetypes: string[] = [];
