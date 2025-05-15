@@ -3,12 +3,13 @@ const { CardManager, StateSerializer } = require('@ptcg/common');
 const { mkdirSync } = require('node:fs');
 
 // Use Heroku config in production
+let config;
 if (process.env.NODE_ENV === 'production') {
-  require('./packages/server/dist/cjs/config.heroku');
+  config = require('./packages/server/dist/cjs/config.heroku').config;
 } else {
   // Search for the argument with init script (like "--init=./init.js")
-  require((process.argv.find(arg => arg.startsWith('--init=')) || '--init=./init.js')
-    .replace(/^--init=/, '').replace(/.js$/, ''));
+  config = require((process.argv.find(arg => arg.startsWith('--init=')) || '--init=./init.js')
+    .replace(/^--init=/, '').replace(/.js$/, '')).config;
 }
 
 const cardManager = CardManager.getInstance();
