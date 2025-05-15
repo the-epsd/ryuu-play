@@ -90,6 +90,7 @@ export class App {
     if (absolutePath) {
       const resolvedPath = path.resolve(absolutePath);
       console.log('Configuring web UI from:', resolvedPath);
+      console.log('Directory contents:', fs.readdirSync(resolvedPath));
 
       // Check if directory exists
       if (!fs.existsSync(resolvedPath)) {
