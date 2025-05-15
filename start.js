@@ -1,12 +1,15 @@
-const { App, BotManager, config } = require('@ptcg/server');
+const { App, BotManager, config: baseConfig } = require('@ptcg/server');
 const { CardManager, StateSerializer } = require('@ptcg/common');
 const { mkdirSync, existsSync } = require('node:fs');
 const path = require('path');
 
+let config = baseConfig;
+
 // Only use Heroku config when running on Heroku
 if (process.env.NODE_ENV === 'production' && process.env.DYNO) {
   console.log('Loading Heroku config...');
-  require('./packages/server/dist/cjs/config.heroku');
+  const { config: herokuConfig } = require('./packages/server/dist/cjs/config.heroku');
+  config = herokuConfig;
   console.log('Heroku config loaded, webUiDir:', config.backend.webUiDir);
 } else {
   // Search for the argument with init script (like "--init=./init.js")
