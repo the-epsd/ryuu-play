@@ -28,7 +28,9 @@ export class ApiService {
   }
 
   private buildUrl(uri: string) {
-    return this.apiUrl + uri;
+    const baseUrl = this.apiUrl.replace(/\/+$/, ''); // Remove trailing slashes from base URL
+    const path = uri.replace(/^\/+/, ''); // Remove leading slashes from path
+    return `${baseUrl}/${path}`;
   }
 
   private buildHeaderOptions() {
@@ -39,7 +41,8 @@ export class ApiService {
   }
 
   public getServerInfo(apiUrl: string) {
-    const url = apiUrl + '/v1/login/info';
+    const baseUrl = apiUrl.replace(/\/+$/, ''); // Remove trailing slashes from base URL
+    const url = `${baseUrl}/v1/login/info`;
     return this.http.get<InfoResponse>(url).pipe(share());
   }
 
