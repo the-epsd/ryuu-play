@@ -2,6 +2,7 @@ const { App, BotManager, config: baseConfig } = require('@ptcg/server');
 const { CardManager, StateSerializer } = require('@ptcg/common');
 const { mkdirSync, existsSync } = require('node:fs');
 const path = require('path');
+const sets = require('@ptcg/sets');
 
 let config = baseConfig;
 
@@ -17,13 +18,6 @@ if (process.env.NODE_ENV === 'production' && process.env.DYNO) {
   cardManager.defineSet(sets.setArceus);
   cardManager.defineSet(sets.setAstralRadiance);
   cardManager.defineSet(sets.setScarletAndVioletEnergy);
-
-  // Bots config
-  config.bots.defaultPassword = 'bot';
-
-  // Sets/scans config
-  config.sets.scansDir = __dirname + '';
-  config.sets.scansUrl = '{cardImage}';
 
   const botManager = BotManager.getInstance();
   botManager.registerBot(new SimpleBot('bot'));
