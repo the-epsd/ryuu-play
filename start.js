@@ -2,7 +2,6 @@ const { App, BotManager, config: baseConfig } = require('@ptcg/server');
 const { CardManager, StateSerializer } = require('@ptcg/common');
 const { mkdirSync, existsSync } = require('node:fs');
 const path = require('path');
-const sets = require('@ptcg/sets');
 
 let config = baseConfig;
 
