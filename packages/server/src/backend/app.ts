@@ -88,9 +88,16 @@ export class App {
 
   public configureWebUi(absolutePath: string): void {
     if (absolutePath) {
+      console.log('Configuring web UI with path:', absolutePath);
       const resolvedPath = path.resolve(absolutePath);
-      console.log('Configuring web UI from:', resolvedPath);
-      console.log('Directory contents:', fs.readdirSync(resolvedPath));
+      console.log('Resolved path:', resolvedPath);
+      console.log('Current working directory:', process.cwd());
+
+      try {
+        console.log('Directory contents:', fs.readdirSync(resolvedPath));
+      } catch (error) {
+        console.error('Error reading directory:', error);
+      }
 
       // Check if directory exists
       if (!fs.existsSync(resolvedPath)) {
@@ -113,6 +120,8 @@ export class App {
         console.log('Serving index.html for route:', req.originalUrl);
         res.sendFile(indexPath);
       });
+    } else {
+      console.log('No web UI path provided');
     }
   }
 

@@ -11,7 +11,12 @@ export class AddressValidatorDirective implements Validator {
 
   validate(control: AbstractControl): ValidationErrors {
     const value: string = control.value;
-    return addressPattern.test(value) ? null : { address: true };
+    if (!value) {
+      return null;
+    }
+    // Remove any @ symbol from the start of the URL
+    const cleanValue = value.replace(/^@/, '');
+    return addressPattern.test(cleanValue) ? null : { address: true };
   }
 
 }
