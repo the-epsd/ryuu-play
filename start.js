@@ -5,7 +5,9 @@ const path = require('path');
 
 // Only use Heroku config when running on Heroku
 if (process.env.NODE_ENV === 'production' && process.env.DYNO) {
+  console.log('Loading Heroku config...');
   require('./packages/server/dist/cjs/config.heroku');
+  console.log('Heroku config loaded, webUiDir:', config.backend.webUiDir);
 } else {
   // Search for the argument with init script (like "--init=./init.js")
   require((process.argv.find(arg => arg.startsWith('--init=')) || '--init=./init.js')
@@ -45,15 +47,24 @@ app.connectToDatabase()
     console.error(error.message);
     process.exit(1);
   })
-  .then(() => app.configureBotManager(botManager))
-  .then(() => app.configureWebUi(config.backend.webUiDir))
+  .then(() => {
+    console.log('Configuring bot manager...');
+    return app.configureBotManager(botManager);
+  })
+  .then(() => {
+    console.log('Configuring web UI with path:', config.backend.webUiDir);
+    return app.configureWebUi(config.backend.webUiDir);
+  })
   // .then(() => app.downloadMissingScans())
   // .catch(error => {
   //   console.log('Unable to download image.');
   //   console.error(error.message);
   //   process.exit(1);
   // })
-  .then(() => app.start())
+  .then(() => {
+    console.log('Starting server...');
+    return app.start();
+  })
   .then(() => {
     const address = config.backend.address;
     const port = config.backend.port;
