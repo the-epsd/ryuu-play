@@ -61,7 +61,7 @@ export const config = {
   sets: {
     scansDir: '',
     scansDownloadUrl: 'http://localhost/scans', // Server downloads missing scans from there
-    scansUrl: '/scans/{set}/{name}.jpg'
+    scansUrl: '{cardImage}'
   },
   email: {
     transporter: {
