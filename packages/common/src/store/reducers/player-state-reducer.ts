@@ -23,7 +23,7 @@ export function playerStateReducer(store: StoreLike, state: State, action: Actio
   }
 
   if (action instanceof ReorderHandAction) {
-    
+
     const player = state.players.find(p => p.id === action.id);
     if (player === undefined || player.hand.cards.length !== action.order.length) {
       throw new GameError(GameMessage.ILLEGAL_ACTION);

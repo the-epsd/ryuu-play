@@ -95,6 +95,7 @@
   "DECK_TITLE": "Decks",
   "DECK_TYPE": "Type",
   "DECK_VALID": "Valid",
+  "DESIGN_SYSTEM": "Design System",
   "ERROR_DISCONNECTED_FROM_SERVER": "Disconnected from server. Please try again.",
   "ERROR_INVALID_NAME_OR_PASSWORD": "Invalid username or password.",
   "ERROR_INVALID_REQUEST": "The request was rejected by the server.",

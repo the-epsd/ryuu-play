@@ -5,11 +5,12 @@ import { Observable, EMPTY } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { switchMap } from 'rxjs/operators';
-
 import { AlertService } from '../shared/alert/alert.service';
 import { ProfileService } from '../api/services/profile.service';
 import { SessionService } from '../shared/session/session.service';
 import { ProfilePopupService } from './profile-popup.service';
+import { ChangeCardImagesPopupComponent } from './change-card-images-popup/change-card-images-popup.component';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 
 @UntilDestroy()
 @Component({
@@ -32,7 +33,8 @@ export class ProfileComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private sessionService: SessionService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private dialog: MatDialog
   ) {
     this.user$ = EMPTY;
     this.owner$ = EMPTY;
@@ -68,6 +70,12 @@ export class ProfileComponent implements OnInit {
           this.router.navigate(['/']);
         }
       });
+  }
+
+  openChangeCardImagesDialog(): void {
+    this.dialog.open(ChangeCardImagesPopupComponent, {
+      width: '350px'
+    });
   }
 
   changePassword() {

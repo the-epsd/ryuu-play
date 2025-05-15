@@ -1,0 +1,72 @@
+<div class="design-system">
+  <div class="sidebar">
+    <mat-nav-list>
+      <a mat-list-item *ngFor="let section of sections" [href]="'#' + section.id">
+        {{ section.name }}
+      </a>
+    </mat-nav-list>
+  </div>
+
+  <div class="content">
+    <section id="colors">
+      <h2>Colors</h2>
+      <p class="section-description">Our color palette is designed to create a cohesive and accessible user interface.
+      </p>
+
+      <div class="color-grid">
+        <div class="color-card" *ngFor="let color of colors">
+          <div class="color-swatch" [style.background-color]="color.hex"></div>
+          <div class="color-info">
+            <h3>{{ color.name }}</h3>
+            <p class="hex">{{ color.hex }}</p>
+            <p class="usage">{{ color.usage }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="color-examples">
+        <h3>Usage Examples</h3>
+        <div class="example-card">
+          <div class="example-header">
+            <h4>Card Example</h4>
+          </div>
+          <div class="example-content">
+            <p>This is an example of how our colors work together in a card component.</p>
+          </div>
+        </div>
+        <div class="example-button-row">
+          <button class="example-button">Example Button</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="typography">
+      <h2>Typography</h2>
+      <div class="typography-examples">
+        <h1>Heading 1</h1>
+        <h2>Heading 2</h2>
+        <h3>Heading 3</h3>
+        <p>Body text example</p>
+      </div>
+    </section>
+
+    <section id="components">
+      <h2>Components</h2>
+      <!-- Component examples will go here -->
+    </section>
+
+    <section id="spacing">
+      <h2>Spacing</h2>
+      <div class="spacing-examples">
+        <!-- Spacing examples will go here -->
+      </div>
+    </section>
+
+    <section id="icons">
+      <h2>Icons</h2>
+      <div class="icon-grid">
+        <!-- Icon examples will go here -->
+      </div>
+    </section>
+  </div>
+</div>

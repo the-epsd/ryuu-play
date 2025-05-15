@@ -8,7 +8,9 @@ import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 
 import { ApiModule } from './api/api.module';
 import { AppComponent } from './app.component';
+import { AppRoutingModule } from './app-routing.module';
 import { DeckModule } from './deck/deck.module';
+import { DesignSystemComponent } from './design-system/design-system.component';
 import { GamesModule } from './games/games.module';
 import { LanguageService } from './main/language-select/language.service';
 import { LoginModule } from './login/login.module';
@@ -22,10 +24,12 @@ import { TableModule } from './table/table.module';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    DesignSystemComponent
   ],
   imports: [
     ApiModule,
+    AppRoutingModule,
     BrowserModule,
     DeckModule,
     GamesModule,
@@ -42,8 +46,8 @@ import { TableModule } from './table/table.module';
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
-        useFactory: ( createTranslateLoader ),
-        deps: [ HttpClient ]
+        useFactory: (createTranslateLoader),
+        deps: [HttpClient]
       }
     })
   ],

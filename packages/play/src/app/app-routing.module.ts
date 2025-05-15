@@ -4,6 +4,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { CanActivateService } from './can-activate.service';
 import { DeckComponent } from './deck/deck.component';
 import { DeckEditComponent } from './deck/deck-edit/deck-edit.component';
+import { DesignSystemComponent } from './design-system/design-system.component';
 import { GamesComponent } from './games/games.component';
 import { LoginComponent } from './login/login/login.component';
 import { MessagesComponent } from './messages/messages.component';
@@ -16,24 +17,25 @@ import { SetNewPasswordComponent } from './login/set-new-password/set-new-passwo
 import { TableComponent } from './table/table.component';
 
 const routes: Routes = [
-    { path: 'deck', component: DeckComponent, canActivate: [ CanActivateService ] },
-    { path: 'deck/:deckId', component: DeckEditComponent, canActivate: [ CanActivateService ] },
-    { path: 'games', component: GamesComponent, canActivate: [ CanActivateService ] },
-    { path: 'login', component: LoginComponent },
-    { path: 'message', redirectTo: 'message/', pathMatch: 'full' },
-    { path: 'message/:userId', component: MessagesComponent, canActivate: [ CanActivateService ] },
-    { path: 'ranking', component: RankingComponent, canActivate: [ CanActivateService ] },
-    { path: 'register', component: RegisterComponent },
-    { path: 'replays', component: ReplaysComponent, canActivate: [ CanActivateService ] },
-    { path: 'profile/:userId', component: ProfileComponent, canActivate: [ CanActivateService ] },
-    { path: 'reset-password', component: ResetPasswordComponent, pathMatch: 'full' },
-    { path: 'reset-password/:token', component: SetNewPasswordComponent },
-    { path: 'table/:gameId', component: TableComponent, canActivate: [ CanActivateService ] },
-    { path: '', redirectTo: '/games', pathMatch: 'full' },
+  { path: 'deck', component: DeckComponent, canActivate: [CanActivateService] },
+  { path: 'deck/:deckId', component: DeckEditComponent, canActivate: [CanActivateService] },
+  { path: 'games', component: GamesComponent, canActivate: [CanActivateService] },
+  { path: 'login', component: LoginComponent },
+  { path: 'message', redirectTo: 'message/', pathMatch: 'full' },
+  { path: 'message/:userId', component: MessagesComponent, canActivate: [CanActivateService] },
+  { path: 'ranking', component: RankingComponent, canActivate: [CanActivateService] },
+  { path: 'register', component: RegisterComponent },
+  { path: 'replays', component: ReplaysComponent, canActivate: [CanActivateService] },
+  { path: 'profile/:userId', component: ProfileComponent, canActivate: [CanActivateService] },
+  { path: 'reset-password', component: ResetPasswordComponent, pathMatch: 'full' },
+  { path: 'reset-password/:token', component: SetNewPasswordComponent },
+  { path: 'table/:gameId', component: TableComponent, canActivate: [CanActivateService] },
+  { path: 'design-system', component: DesignSystemComponent, canActivate: [CanActivateService] },
+  { path: '', redirectTo: '/games', pathMatch: 'full' },
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, {})],
+  imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }

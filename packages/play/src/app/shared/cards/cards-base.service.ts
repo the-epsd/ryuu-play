@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Card, StateSerializer, SuperType, PokemonCard, EnergyCard, CardType, TrainerCard } from '@ptcg/common';
 
 import { ApiService } from '../../api/api.service';
 import { CardInfoPopupData, CardInfoPopupComponent } from './card-info-popup/card-info-popup.component';
@@ -7,8 +6,10 @@ import { CardInfoListPopupComponent } from './card-info-list-popup/card-info-lis
 import { CardInfoPaneAction } from './card-info-pane/card-info-pane.component';
 import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { SessionService } from '../session/session.service';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { Card, StateSerializer, SuperType, PokemonCard, EnergyCard, CardType, TrainerCard } from '@ptcg/common';
 
 @Injectable({
   providedIn: 'root'

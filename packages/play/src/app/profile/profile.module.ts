@@ -7,6 +7,7 @@ import { EditAvatarsPopupComponent } from './edit-avatars-popup/edit-avatars-pop
 import { AddAvatarPopupComponent } from './add-avatar-popup/add-avatar-popup.component';
 import { ChangeEmailPopupComponent } from './change-email-popup/change-email-popup.component';
 import { ChangePasswordPopupComponent } from './change-password-popup/change-password-popup.component';
+import { ChangeCardImagesPopupComponent } from './change-card-images-popup/change-card-images-popup.component';
 
 @NgModule({
     imports: [
@@ -18,7 +19,8 @@ import { ChangePasswordPopupComponent } from './change-password-popup/change-pas
         ChangeEmailPopupComponent,
         ChangePasswordPopupComponent,
         EditAvatarsPopupComponent,
-        ProfileComponent
+        ProfileComponent,
+        ChangeCardImagesPopupComponent
     ],
     exports: []
 })

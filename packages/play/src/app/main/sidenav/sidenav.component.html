@@ -12,12 +12,13 @@
     {{ 'MAIN_REPLAYS' | translate }}
   </a>
   <a routerLink="/message" mat-list-item>
-    <span
-      [matBadge]="unreadMessages$ | async"
-      matBadgeOverlap="false"
+    <span [matBadge]="unreadMessages$ | async" matBadgeOverlap="false"
       [matBadgeHidden]="(unreadMessages$ | async) === 0">
       {{ 'MAIN_MESSAGES' | translate }}
     </span>
+  </a>
+  <a routerLink="/design-system" mat-list-item>
+    {{ 'DESIGN_SYSTEM' | translate }}
   </a>
 </mat-nav-list>
 
@@ -29,9 +30,7 @@
     <h4 translate>MAIN_TABLES</h4>
   </div>
 
-  <ptcg-sidenav-item
-    *ngFor="let gameState of (gameStates$ | async)"
-    [gameState]="gameState">
+  <ptcg-sidenav-item *ngFor="let gameState of (gameStates$ | async)" [gameState]="gameState">
   </ptcg-sidenav-item>
 
 </mat-nav-list>
