@@ -1,5 +1,7 @@
 import express from 'express';
 import { json } from 'body-parser';
+import * as fs from 'fs';
+import * as path from 'path';
 
 import { Core } from '../game/core/core';
 import { BotManager } from '../game/bots/bot-manager';
@@ -58,8 +60,16 @@ export class App {
     define('/v1/replays', Replays);
     define('/v1/resetPassword', ResetPassword);
 
-    app.use('/scans', express.static(config.sets.scansDir));
-    app.use('/avatars', express.static(config.backend.avatarsDir));
+    // Ensure directories exist before serving static files
+    if (config.sets.scansDir) {
+      fs.mkdirSync(config.sets.scansDir, { recursive: true });
+      app.use('/scans', express.static(config.sets.scansDir));
+    }
+
+    if (config.backend.avatarsDir) {
+      fs.mkdirSync(config.backend.avatarsDir, { recursive: true });
+      app.use('/avatars', express.static(config.backend.avatarsDir));
+    }
 
     return app;
   }
@@ -78,8 +88,10 @@ export class App {
 
   public configureWebUi(absolutePath: string): void {
     if (absolutePath) {
+      // Ensure the web UI directory exists
+      fs.mkdirSync(absolutePath, { recursive: true });
       this.app.use(express.static(absolutePath));
-      this.app.use('*', (req, res) => res.sendFile(absolutePath + '/index.html'));
+      this.app.use('*', (req, res) => res.sendFile(path.join(absolutePath, 'index.html')));
     }
   }
 

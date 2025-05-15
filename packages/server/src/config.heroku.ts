@@ -1,6 +1,8 @@
 import { config as baseConfig } from './config';
 import * as path from 'path';
 
+const isHeroku = process.env.NODE_ENV === 'production' && process.env.DYNO;
+
 export const config = {
   ...baseConfig,
   backend: {
@@ -8,17 +10,15 @@ export const config = {
     address: '0.0.0.0',
     port: process.env.PORT ? parseInt(process.env.PORT) : 12021,
     avatarsDir: process.env.AVATARS_DIR || '/tmp/avatars',
-    webUiDir: process.env.WEB_UI_DIR || path.resolve(__dirname, '../../../play/dist/ptcg-play'),
+    webUiDir: process.env.WEB_UI_DIR || (isHeroku
+      ? '/app/packages/play/dist/ptcg-play'
+      : path.resolve(__dirname, '../../../play/dist/ptcg-play')),
     allowCors: true,
     secret: process.env.SECRET_KEY || '!secret!'
   },
   storage: {
-    type: 'mysql',
-    host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
-    username: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'ptcg'
+    type: 'sqlite',
+    database: process.env.SQLITE_PATH || '/app/database.sq3'
   },
   sets: {
     ...baseConfig.sets,
