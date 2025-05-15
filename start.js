@@ -1,15 +1,14 @@
-const { App, BotManager } = require('@ptcg/server');
+const { App, BotManager, config } = require('@ptcg/server');
 const { CardManager, StateSerializer } = require('@ptcg/common');
 const { mkdirSync } = require('node:fs');
 
-// Use Heroku config in production
-let config;
-if (process.env.NODE_ENV === 'production') {
-  config = require('./packages/server/dist/cjs/config.heroku').config;
+// Only use Heroku config when running on Heroku
+if (process.env.NODE_ENV === 'production' && process.env.DYNO) {
+  require('./packages/server/dist/cjs/config.heroku');
 } else {
   // Search for the argument with init script (like "--init=./init.js")
-  config = require((process.argv.find(arg => arg.startsWith('--init=')) || '--init=./init.js')
-    .replace(/^--init=/, '').replace(/.js$/, '')).config;
+  require((process.argv.find(arg => arg.startsWith('--init=')) || '--init=./init.js')
+    .replace(/^--init=/, '').replace(/.js$/, ''));
 }
 
 const cardManager = CardManager.getInstance();
