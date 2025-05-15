@@ -1,6 +1,7 @@
 const { App, BotManager, config } = require('@ptcg/server');
 const { CardManager, StateSerializer } = require('@ptcg/common');
-const { mkdirSync } = require('node:fs');
+const { mkdirSync, existsSync } = require('node:fs');
+const path = require('path');
 
 // Only use Heroku config when running on Heroku
 if (process.env.NODE_ENV === 'production' && process.env.DYNO) {
@@ -18,9 +19,24 @@ const app = new App();
 // Feed state-serializer with card definitions
 StateSerializer.setKnownCards(cardManager.getAllCards());
 
-// Ensure directories exists
-mkdirSync(config.backend.avatarsDir, { recursive: true });
-mkdirSync(config.sets.scansDir, { recursive: true });
+// Ensure directories exist
+try {
+  if (config.backend.avatarsDir) {
+    const avatarsDir = path.resolve(config.backend.avatarsDir);
+    if (!existsSync(avatarsDir)) {
+      mkdirSync(avatarsDir, { recursive: true });
+    }
+  }
+
+  if (config.sets.scansDir) {
+    const scansDir = path.resolve(config.sets.scansDir);
+    if (!existsSync(scansDir)) {
+      mkdirSync(scansDir, { recursive: true });
+    }
+  }
+} catch (error) {
+  console.warn('Warning: Could not create directories:', error.message);
+}
 
 // Run server app
 app.connectToDatabase()

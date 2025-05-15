@@ -19,12 +19,8 @@ export const config = {
     webUiDir: ''  // Directory to ptcg-play static files (empty = UI disabled)
   },
   storage: {
-    type: 'mysql',
-    host: 'localhost',
-    port: 3306,
-    username: 'root',
-    password: '',
-    database: 'ptcg'
+    type: 'sqlite',
+    database: 'database.sq3'
   },
   core: {
     debug: false,
