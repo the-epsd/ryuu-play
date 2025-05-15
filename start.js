@@ -5,6 +5,9 @@ const path = require('path');
 
 let config = baseConfig;
 
+// Always require init.js to load sets
+require('./init.js');
+
 // Only use Heroku config when running on Heroku
 if (process.env.NODE_ENV === 'production' && process.env.DYNO) {
   console.log('Loading Heroku config...');
