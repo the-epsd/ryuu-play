@@ -19,7 +19,7 @@ export class PokemonCardList extends CardList {
   public sleepFlips = 1;
   public boardEffect: BoardEffect[] = [];
   public hpBonus: number = 0;
-  public tool: Card | undefined;
+  public tools: Card[] = [];
   public energyCards: Card[] = [];
   public stadium: Card | undefined;
   public isActivatingCard: boolean = false;
@@ -28,7 +28,6 @@ export class PokemonCardList extends CardList {
   public triggerAnimation: boolean = false;
   public showBasicAnimation: boolean = false;
   public triggerAttackAnimation: boolean = false;
-
 
   public static readonly ATTACK_USED_MARKER = 'ATTACK_USED_MARKER';
   public static readonly ATTACK_USED_2_MARKER = 'ATTACK_USED_2_MARKER';
@@ -61,7 +60,7 @@ export class PokemonCardList extends CardList {
   public getPokemons(): PokemonCard[] {
     const result: PokemonCard[] = [];
     for (const card of this.cards) {
-      if (card.superType === SuperType.POKEMON && card !== this.tool && !this.energyCards.includes(card)) {
+      if (card.superType === SuperType.POKEMON && card !== this.tools[0] && !this.energyCards.includes(card)) {
         result.push(card as PokemonCard);
       } else if (card.name === 'Lillie\'s Poké Doll') {
         result.push(card as PokemonCard);
@@ -134,8 +133,8 @@ export class PokemonCardList extends CardList {
     // if (this.cards.length === 0) {
     //   this.damage = 0;
     // }
-    // if (this.tool && !this.cards.includes(this.tool)) {
-    //   this.tool = undefined;
+    // if (this.tools.length === 0) {
+    //   this.tools = [];
     // }
   }
 
@@ -278,24 +277,21 @@ export class PokemonCardList extends CardList {
     return this.cards.some(c => c.tags.includes(CardTag.ETHANS));
   }
 
-  getToolEffect(): Power | Attack | undefined {
-    if (!this.tool) {
+  public getToolEffect(): Power | Attack | undefined {
+    if (this.tools.length === 0) {
       return;
     }
 
-    const toolCard = this.tool.cards;
-
-    if (toolCard instanceof PokemonCard) {
-      return toolCard.powers[0] || toolCard.attacks[0];
+    // Get effects from all tools
+    for (const tool of this.tools) {
+      const toolCard = tool.cards;
+      if (toolCard instanceof PokemonCard) {
+        const effect = toolCard.powers[0] || toolCard.attacks[0];
+        if (effect) {
+          return effect;
+        }
+      }
     }
-
-    // removeTool(tool: Card): void {
-    //   const index = this.tools.indexOf(tool);
-    //   if (index >= 0) {
-    //     delete this.tools[index];
-    //   }
-    //   this.tools = this.tools.filter(c => c instanceof Card);
-    // }
   }
 
   isPlayerActive(state: State): boolean {

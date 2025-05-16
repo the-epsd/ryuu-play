@@ -40,6 +40,36 @@ export class BoardComponent implements OnDestroy {
   public bottomBenchTarget: DropTargetType[];
   public bottomBenchHighlight$: Observable<boolean>[];
 
+  get stadiumCard(): CardList {
+    // If top player has a stadium card, use it
+    if (this.topPlayer?.stadium?.cards?.length > 0) {
+      return this.topPlayer.stadium;
+    }
+    // If bottom player has a stadium card, use it
+    if (this.bottomPlayer?.stadium?.cards?.length > 0) {
+      return this.bottomPlayer.stadium;
+    }
+    // No stadium card is in play
+    return null;
+  }
+
+  // Determine who owns the active stadium
+  get stadiumOwner(): boolean {
+    if (!this.stadiumCard) return false;
+
+    // Check if it belongs to top player
+    if (this.topPlayer?.stadium?.cards?.length > 0) {
+      return this.topPlayer.id === this.clientId;
+    }
+
+    // Check if it belongs to bottom player
+    if (this.bottomPlayer?.stadium?.cards?.length > 0) {
+      return this.bottomPlayer.id === this.clientId;
+    }
+
+    return false;
+  }
+
   constructor(
     private cardsBaseService: CardsBaseService,
     private dnd: DndService,
@@ -70,7 +100,7 @@ export class BoardComponent implements OnDestroy {
     player: PlayerType,
     slot: SlotType,
     index: number = 0
-  ): [DropTargetType, Observable<boolean>]  {
+  ): [DropTargetType, Observable<boolean>] {
 
     const target = { player, slot, index };
     let dropTarget: DropTargetType;
@@ -118,7 +148,7 @@ export class BoardComponent implements OnDestroy {
 
     highlight$ = dropState.pipe(map(state => state.canDrop && state.isOver));
 
-    return [ dropTarget, highlight$ ];
+    return [dropTarget, highlight$];
   }
 
   private handlePlayFromHand(item: HandItem, target: CardTarget): void {
@@ -283,7 +313,7 @@ export class BoardComponent implements OnDestroy {
         if (result.ability) {
           this.gameService.ability(gameId, result.ability, target);
 
-        // Use attack from the card
+          // Use attack from the card
         } else if (result.attack) {
           this.gameService.attack(gameId, result.attack);
         }

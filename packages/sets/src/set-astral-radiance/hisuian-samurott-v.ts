@@ -1,4 +1,4 @@
-import { StoreLike, State, Effect, AttackEffect, CardTag, CardTarget, CardType, ChoosePokemonPrompt, DISCARD_X_ENERGY_FROM_THIS_POKEMON, GameMessage, PlayerType, PokemonCard, PokemonCardList, SlotType, Stage, StateUtils } from '@ptcg/common';
+import { StoreLike, State, Effect, AttackEffect, CardTag, CardTarget, CardType, ChoosePokemonPrompt, DISCARD_X_ENERGY_FROM_THIS_POKEMON, GameMessage, PlayerType, PokemonCard, PokemonCardList, SlotType, Stage, StateUtils, MOVE_CARDS } from '@ptcg/common';
 
 export class HisuianSamurottV extends PokemonCard {
 
@@ -50,7 +50,7 @@ export class HisuianSamurottV extends PokemonCard {
       let pokemonsWithTool = 0;
       const blocked: CardTarget[] = [];
       opponent.forEachPokemon(PlayerType.TOP_PLAYER, (cardList, card, target) => {
-        if (cardList.tool !== undefined) {
+        if (cardList.tools.length > 0) {
           pokemonsWithTool += 1;
         } else {
           blocked.push(target);
@@ -78,9 +78,9 @@ export class HisuianSamurottV extends PokemonCard {
 
         targets.forEach(target => {
           const owner = StateUtils.findOwner(state, target);
-          if (target.tool !== undefined) {
-            target.moveCardTo(target.tool, owner.discard);
-            target.tool = undefined;
+          if (target.tools.length > 0) {
+            MOVE_CARDS(store, state, target, owner.discard, { cards: target.tools });
+            target.tools = [];
           }
         });
       });

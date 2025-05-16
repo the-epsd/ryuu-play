@@ -26,9 +26,11 @@ config.sets.scansUrl = '{cardImage}';
 
 // Initialize card manager
 const cardManager = CardManager.getInstance();
-cardManager.defineSet(sets.setAncientOrigins);
-cardManager.defineSet(sets.setArceus);
-cardManager.defineSet(sets.setAstralRadiance);
+// cardManager.defineSet(sets.setAncientOrigins);
+// cardManager.defineSet(sets.setArceus);
+// cardManager.defineSet(sets.setAstralRadiance);
+cardManager.defineSet(sets.setJourneyTogether);
+cardManager.defineSet(sets.setM1S);
 cardManager.defineSet(sets.setScarletAndVioletEnergy);
 
 // Feed state-serializer with card definitions

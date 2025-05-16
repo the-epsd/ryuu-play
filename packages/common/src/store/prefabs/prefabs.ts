@@ -11,6 +11,7 @@ import { DealDamageEffect, PutDamageEffect, HealTargetEffect, DiscardCardsEffect
 import { AddSpecialConditionsPowerEffect, CheckPrizesDestinationEffect, CheckProvidedEnergyEffect } from '../effects/check-effects';
 import { Effect } from '../effects/effect';
 import { AttackEffect, PowerEffect, EvolveEffect, KnockOutEffect, RetreatEffect, SpecialEnergyEffect, MoveCardsEffect, DrawPrizesEffect } from '../effects/game-effects';
+import { AfterAttackEffect, EndTurnEffect } from '../effects/game-phase-effects';
 import { AttachEnergyEffect, ToolEffect } from '../effects/play-card-effects';
 import { AttachEnergyOptions, AttachEnergyPrompt } from '../prompts/attach-energy-prompt';
 import { ChooseCardsOptions, ChooseCardsPrompt } from '../prompts/choose-cards-prompt';
@@ -56,9 +57,9 @@ export function WAS_POWER_USED(effect: Effect, index: number, user: PokemonCard)
   return effect instanceof PowerEffect && effect.power === user.powers[index];
 }
 
-// export const AFTER_ATTACK = (effect: Effect): effect is AfterAttackEffect => {
-//   return effect instanceof AfterAttackEffect;
-// };
+export const AFTER_ATTACK = (effect: Effect): effect is AfterAttackEffect => {
+  return effect instanceof AfterAttackEffect;
+};
 
 
 /**
@@ -1063,27 +1064,27 @@ export function ADD_CONFUSION_TO_PLAYER_ACTIVE(store: StoreLike, state: State, p
 
 //#region Markers
 
-// export function ADD_MARKER(marker: string, owner: Player | Card | PokemonCard | PokemonCardList, source: Card) {
-//   owner.marker.addMarker(marker, source);
-// }
+export function ADD_MARKER(marker: string, owner: Player | Card | PokemonCard | PokemonCardList, source: Card) {
+  owner.marker.addMarker(marker, source);
+}
 
-// export function REMOVE_MARKER(marker: string, owner: Player | Card | PokemonCard | PokemonCardList, source?: Card) {
-//   return owner.marker.removeMarker(marker, source);
-// }
+export function REMOVE_MARKER(marker: string, owner: Player | Card | PokemonCard | PokemonCardList, source?: Card) {
+  return owner.marker.removeMarker(marker, source);
+}
 
-// export function HAS_MARKER(marker: string, owner: Player | Card | PokemonCard | PokemonCardList, source?: Card): boolean {
-//   return owner.marker.hasMarker(marker, source);
-// }
+export function HAS_MARKER(marker: string, owner: Player | Card | PokemonCard | PokemonCardList, source?: Card): boolean {
+  return owner.marker.hasMarker(marker, source);
+}
 
-// export function BLOCK_EFFECT_IF_MARKER(marker: string, owner: Player | Card | PokemonCard | PokemonCardList, source?: Card) {
-//   if (HAS_MARKER(marker, owner, source))
-//     throw new GameError(GameMessage.BLOCKED_BY_EFFECT);
-// }
+export function BLOCK_EFFECT_IF_MARKER(marker: string, owner: Player | Card | PokemonCard | PokemonCardList, source?: Card) {
+  if (HAS_MARKER(marker, owner, source))
+    throw new GameError(GameMessage.BLOCKED_BY_EFFECT);
+}
 
-// export function PREVENT_DAMAGE_IF_TARGET_HAS_MARKER(effect: Effect, marker: string, source?: Card) {
-//   if (effect instanceof PutDamageEffect && HAS_MARKER(marker, effect.target, source))
-//     effect.preventDefault = true;
-// }
+export function PREVENT_DAMAGE_IF_TARGET_HAS_MARKER(effect: Effect, marker: string, source?: Card) {
+  if (effect instanceof PutDamageEffect && HAS_MARKER(marker, effect.target, source))
+    effect.preventDefault = true;
+}
 
 export function PREVENT_DAMAGE_IF_SOURCE_HAS_TAG(effect: Effect, tag: string, source: Card) {
   if (effect instanceof PutDamageEffect && HAS_TAG(tag, source))
@@ -1094,36 +1095,36 @@ export function HAS_TAG(tag: string, source: Card): boolean {
   return source.tags.includes(tag);
 }
 
-// export function REMOVE_MARKER_AT_END_OF_TURN(effect: Effect, marker: string, source: Card) {
-//   if (effect instanceof EndTurnEffect && HAS_MARKER(marker, effect.player, source))
-//     REMOVE_MARKER(marker, effect.player, source);
-// }
+export function REMOVE_MARKER_AT_END_OF_TURN(effect: Effect, marker: string, source: Card) {
+  if (effect instanceof EndTurnEffect && HAS_MARKER(marker, effect.player, source))
+    REMOVE_MARKER(marker, effect.player, source);
+}
 
-// export function REMOVE_MARKER_FROM_ACTIVE_AT_END_OF_TURN(effect: Effect, marker: string, source: Card) {
-//   if (effect instanceof EndTurnEffect && HAS_MARKER(marker, effect.player.active, source))
-//     REMOVE_MARKER(marker, effect.player.active, source);
-// }
+export function REMOVE_MARKER_FROM_ACTIVE_AT_END_OF_TURN(effect: Effect, marker: string, source: Card) {
+  if (effect instanceof EndTurnEffect && HAS_MARKER(marker, effect.player.active, source))
+    REMOVE_MARKER(marker, effect.player.active, source);
+}
 
-// export function REPLACE_MARKER_AT_END_OF_TURN(effect: Effect, oldMarker: string, newMarker: string, source: Card) {
-//   if (effect instanceof EndTurnEffect && HAS_MARKER(oldMarker, effect.player, source)) {
-//     REMOVE_MARKER(oldMarker, effect.player, source);
-//     ADD_MARKER(newMarker, effect.player, source);
-//   }
-// }
+export function REPLACE_MARKER_AT_END_OF_TURN(effect: Effect, oldMarker: string, newMarker: string, source: Card) {
+  if (effect instanceof EndTurnEffect && HAS_MARKER(oldMarker, effect.player, source)) {
+    REMOVE_MARKER(oldMarker, effect.player, source);
+    ADD_MARKER(newMarker, effect.player, source);
+  }
+}
 
 /**
  * If an EndTurnEffect is given, will check for `clearerMarker` on the player whose turn it is,
  * and clear all of the player or opponent's `pokemonMarker`s.
  * Useful for "During your opponent's next turn" effects.
  */
-// export function CLEAR_MARKER_AND_OPPONENTS_POKEMON_MARKER_AT_END_OF_TURN(state: State, effect: Effect, clearerMarker: string, pokemonMarker: string, source: Card) {
-//   if (effect instanceof EndTurnEffect && HAS_MARKER(clearerMarker, effect.player, source)) {
-//     REMOVE_MARKER(clearerMarker, effect.player, source);
-//     const opponent = StateUtils.getOpponent(state, effect.player);
-//     REMOVE_MARKER(pokemonMarker, opponent, source);
-//     opponent.forEachPokemon(PlayerType.TOP_PLAYER, (cardList) => REMOVE_MARKER(pokemonMarker, cardList, source));
-//   }
-// }
+export function CLEAR_MARKER_AND_OPPONENTS_POKEMON_MARKER_AT_END_OF_TURN(state: State, effect: Effect, clearerMarker: string, pokemonMarker: string, source: Card) {
+  if (effect instanceof EndTurnEffect && HAS_MARKER(clearerMarker, effect.player, source)) {
+    REMOVE_MARKER(clearerMarker, effect.player, source);
+    const opponent = StateUtils.getOpponent(state, effect.player);
+    REMOVE_MARKER(pokemonMarker, opponent, source);
+    opponent.forEachPokemon(PlayerType.TOP_PLAYER, (cardList) => REMOVE_MARKER(pokemonMarker, cardList, source));
+  }
+}
 
 export function BLOCK_RETREAT_IF_MARKER(effect: Effect, marker: string, source: Card) {
   if (effect instanceof RetreatEffect && effect.player.active.marker.hasMarker(marker, source))

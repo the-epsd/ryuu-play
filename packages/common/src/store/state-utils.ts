@@ -8,6 +8,7 @@ import { State } from './state/state';
 import { Player } from './state/player';
 import { PokemonCardList } from './state/pokemon-card-list';
 import { EnergyMap } from './prompts/choose-energy-prompt';
+import { PokemonCard } from './card/pokemon-card';
 
 export class StateUtils {
   public static checkEnoughEnergy(energy: EnergyMap[], cost: CardType[]): boolean {
@@ -133,6 +134,22 @@ export class StateUtils {
       }
     }
     throw new GameError(GameMessage.INVALID_GAME_STATE);
+  }
+
+  public static isPokemonInPlay(player: Player, pokemon: PokemonCard, location?: SlotType.BENCH | SlotType.ACTIVE): boolean {
+    // Check active Pokemon
+    if (player.active.cards.includes(pokemon)) {
+      return location === undefined || location === SlotType.ACTIVE;
+    }
+
+    // Check bench Pokemon
+    for (const bench of player.bench) {
+      if (bench.cards.includes(pokemon)) {
+        return location === undefined || location === SlotType.BENCH;
+      }
+    }
+
+    return false;
   }
 
   public static getStadiumCard(state: State): Card | undefined {

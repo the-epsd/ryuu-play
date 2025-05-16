@@ -47,7 +47,9 @@ export function playTrainerReducer(store: StoreLike, state: State, effect: Effec
     if (pokemonCard === undefined) {
       throw new GameError(GameMessage.INVALID_TARGET);
     }
-    if (effect.target.tool !== undefined) {
+
+    // Check if Pokemon already has max tools
+    if (effect.target.tools.length >= pokemonCard.maxTools) {
       throw new GameError(GameMessage.POKEMON_TOOL_ALREADY_ATTACHED);
     }
 
@@ -57,7 +59,7 @@ export function playTrainerReducer(store: StoreLike, state: State, effect: Effec
       pokemon: pokemonCard.name
     });
     effect.player.hand.moveCardTo(effect.trainerCard, effect.target);
-    effect.target.tool = effect.trainerCard;
+    effect.target.tools.push(effect.trainerCard);
 
     const playTrainer = new TrainerEffect(effect.player, effect.trainerCard, effect.target);
     state = store.reduceEffect(state, playTrainer);

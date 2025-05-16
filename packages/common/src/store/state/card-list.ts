@@ -6,6 +6,11 @@ import { EnergyType, SuperType, TrainerType } from '../card/card-types';
 import { EnergyCard } from '../card/energy-card';
 import { TrainerCard } from '../card/trainer-card';
 
+export enum StadiumDirection {
+  UP = 'up',
+  DOWN = 'down'
+}
+
 export class CardList {
 
   public cards: Card[] = [];
@@ -13,6 +18,12 @@ export class CardList {
   public isPublic: boolean = false;
 
   public isSecret: boolean = false;
+
+  public faceUpPrize: boolean = false;
+
+  public stadiumDirection: StadiumDirection = StadiumDirection.UP;
+
+  public markedAsNotSecret: boolean = false;
 
   public static fromList(names: string[]): CardList {
     const cardList = new CardList();

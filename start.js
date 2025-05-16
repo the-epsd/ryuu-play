@@ -21,6 +21,8 @@ if (process.env.NODE_ENV === 'production' && process.env.DYNO) {
   cardManager.defineSet(sets.setAncientOrigins);
   cardManager.defineSet(sets.setArceus);
   cardManager.defineSet(sets.setAstralRadiance);
+  cardManager.defineSet(sets.setJourneyTogether);
+  cardManager.defineSet(sets.setM1S);
   cardManager.defineSet(sets.setScarletAndVioletEnergy);
 
   // Feed state-serializer with card definitions

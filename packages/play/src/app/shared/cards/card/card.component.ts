@@ -15,12 +15,17 @@ export class CardComponent {
   public data: Card;
 
   @Input() cardback = false;
-
   @Input() placeholder = false;
+
+  @Input() set customImageUrl(value: string) {
+    if (value && this.data) {
+      this.scanUrl = value;
+    }
+  }
 
   @Input() set card(value: Card) {
     this.data = value;
-    this.scanUrl = this.cardsBaseService.getScanUrl(this.data);
+    this.scanUrl = this.customImageUrl || this.cardsBaseService.getScanUrl(this.data);
   }
 
   constructor(

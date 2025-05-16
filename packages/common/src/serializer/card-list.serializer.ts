@@ -18,8 +18,8 @@ export class CardListSerializer implements Serializer<CardList> {
 
     if (cardList instanceof PokemonCardList) {
       constructorName = 'PokemonCardList';
-      if (cardList.tool !== undefined) {
-        data.tool = cardList.tool.id;
+      if (cardList.tools.length > 0) {
+        data.tools = cardList.tools.map(tool => tool.id);
       }
     }
 
@@ -37,8 +37,8 @@ export class CardListSerializer implements Serializer<CardList> {
 
     delete (data as any)._type;
 
-    if (data.tool !== undefined) {
-      data.tool = this.fromIndex(data.tool, context);
+    if (data.tools !== undefined) {
+      data.tools = data.tools.map((index: number) => this.fromIndex(index, context));
     }
 
     const indexes: number[] = data.cards;

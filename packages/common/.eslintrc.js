@@ -16,12 +16,12 @@ module.exports = {
         '@typescript-eslint'
     ],
     'rules': {
-        'indent': ['error', 2, { 'SwitchCase': 1 }],
-        'linebreak-style': ['error', 'unix'],
+        'indent': 'off',
+        'linebreak-style': 'off',
         'prefer-rest-params': 'off',
         'require-yield': 'off',
-        'quotes': ['error', 'single'],
-        'semi': ['error', 'always'],
+        'quotes': 'off',
+        'semi': 'off',
         '@typescript-eslint/no-unused-vars': ['error',
             {
               'vars': 'all',
