@@ -4,5 +4,7 @@ export * from './set-astral-radiance';
 export * from './set-destined-rivals';
 export * from './set-journey-together';
 export * from './set-m1s';
+export * from './set-paldea-evolved';
 export * from './set-scarlet-and-violet';
 export * from './set-scarlet-and-violet-energy';
+export * from './set-scarlet-and-violet-promos';

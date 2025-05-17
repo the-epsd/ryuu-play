@@ -32,8 +32,10 @@ const cardManager = CardManager.getInstance();
 cardManager.defineSet(sets.setDestinedRivals);
 cardManager.defineSet(sets.setJourneyTogether);
 cardManager.defineSet(sets.setM1S);
+cardManager.defineSet(sets.setPaldeaEvolved);
 cardManager.defineSet(sets.setScarletAndViolet);
 cardManager.defineSet(sets.setScarletAndVioletEnergy);
+cardManager.defineSet(sets.setScarletAndVioletPromos);
 
 // Feed state-serializer with card definitions
 StateSerializer.setKnownCards(cardManager.getAllCards());

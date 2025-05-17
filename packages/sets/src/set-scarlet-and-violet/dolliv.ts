@@ -1,4 +1,4 @@
-import { PokemonCard, Stage, CardType, StoreLike, State, Effect, AttackEffect, StateUtils, PutDamageEffect, AbstractAttackEffect, EndTurnEffect, PlayerType } from "@ptcg/common";
+import { PokemonCard, Stage, StoreLike, State, Effect, AttackEffect, StateUtils, PutDamageEffect, AbstractAttackEffect, EndTurnEffect, PlayerType } from "@ptcg/common";
 
 export class Dolliv extends PokemonCard {
   public evolvesFrom = 'Smoliv';
