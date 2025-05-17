@@ -18,11 +18,13 @@ if (process.env.NODE_ENV === 'production' && process.env.DYNO) {
   config.backend.address = '0.0.0.0'; // Bind to all interfaces
 
   const cardManager = CardManager.getInstance();
-  cardManager.defineSet(sets.setAncientOrigins);
-  cardManager.defineSet(sets.setArceus);
-  cardManager.defineSet(sets.setAstralRadiance);
+  // cardManager.defineSet(sets.setAncientOrigins);
+  // cardManager.defineSet(sets.setArceus);
+  // cardManager.defineSet(sets.setAstralRadiance);
+  cardManager.defineSet(sets.setDestinedRivals);
   cardManager.defineSet(sets.setJourneyTogether);
   cardManager.defineSet(sets.setM1S);
+  cardManager.defineSet(sets.setScarletAndViolet);
   cardManager.defineSet(sets.setScarletAndVioletEnergy);
 
   // Feed state-serializer with card definitions

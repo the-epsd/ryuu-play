@@ -10,6 +10,8 @@ export const PutDamagePromptType = 'Put damage';
 export interface PutDamageOptions {
   allowCancel: boolean;
   blocked: CardTarget[];
+  allowPlacePartialDamage?: boolean | undefined;
+  damageMultiple?: number;
 }
 
 export class PutDamagePrompt extends Prompt<DamageMap[]> {
@@ -32,7 +34,9 @@ export class PutDamagePrompt extends Prompt<DamageMap[]> {
     // Default options
     this.options = Object.assign({}, {
       allowCancel: true,
-      blocked: []
+      blocked: [],
+      allowPlacePartialDamage: false,
+      damageMultiple: 10,
     }, options);
   }
 
@@ -48,7 +52,7 @@ export class PutDamagePrompt extends Prompt<DamageMap[]> {
     let damage = 0;
     result.forEach(r => { damage += r.damage; });
 
-    if (this.damage !== damage) {
+    if (this.damage !== damage && !this.options.allowPlacePartialDamage) {
       return false;
     }
 
@@ -77,5 +81,4 @@ export class PutDamagePrompt extends Prompt<DamageMap[]> {
 
     return true;
   }
-
 }

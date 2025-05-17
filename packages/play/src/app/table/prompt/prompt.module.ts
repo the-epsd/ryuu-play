@@ -24,6 +24,7 @@ import { PromptInvitePlayerComponent } from './prompt-invite-player/prompt-invit
 import { PromptChooseAttackComponent } from './prompt-choose-attack/prompt-choose-attack.component';
 import { PromptPutDamageComponent } from './prompt-put-damage/prompt-put-damage.component';
 import { PromptConfirmCardsComponent } from './prompt-confirm-cards/prompt-confirm-cards.component';
+import { PromptDiscardEnergyComponent } from './prompt-discard-energy/prompt-discard-energy.component';
 
 
 @NgModule({
@@ -48,7 +49,8 @@ import { PromptConfirmCardsComponent } from './prompt-confirm-cards/prompt-confi
     PromptInvitePlayerComponent,
     PromptChooseAttackComponent,
     PromptPutDamageComponent,
-    PromptConfirmCardsComponent
+    PromptConfirmCardsComponent,
+    PromptDiscardEnergyComponent
   ],
   imports: [
     BoardModule,

@@ -44,6 +44,7 @@ export * from './prompts/select-prompt';
 export * from './prompts/show-cards-prompt';
 export * from './prompts/shuffle-prompt';
 export * from './prompts/confirm-cards-prompt';
+export * from './prompts/discard-energy-prompt';
 
 export * from './state/card-list';
 export * from './state/card-marker';
