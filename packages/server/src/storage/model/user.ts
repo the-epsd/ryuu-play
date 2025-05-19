@@ -31,22 +31,19 @@ export class User extends BaseEntity {
   public registered: number = 0;
 
   @Column({ type: 'bigint', transformer: [bigint] })
-  public lastSeen: number = 0;
-
-  @Column({ type: 'bigint', transformer: [bigint] })
   public lastRankingChange: number = 0;
 
   @Column()
   public avatarFile: string = '';
 
   @OneToMany(type => Deck, deck => deck.user)
-    decks!: Deck[];
+  decks!: Deck[];
 
   @OneToMany(type => Avatar, avatar => avatar.user)
-    avatars!: Avatar[];
+  avatars!: Avatar[];
 
   @OneToMany(type => Replay, replay => replay.user)
-    replays!: Replay[];
+  replays!: Replay[];
 
   public getRank(): Rank {
     let rank = rankLevels[0].rank;
@@ -57,11 +54,5 @@ export class User extends BaseEntity {
       rank = level.rank;
     }
     return rank;
-  }
-
-  public async updateLastSeen(): Promise<this> {
-    this.lastSeen = Date.now();
-    await User.update(this.id, { lastSeen: this.lastSeen });
-    return this;
   }
 }

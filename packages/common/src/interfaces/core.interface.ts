@@ -46,7 +46,6 @@ export interface UserInfo {
   ranking: number;
   rank: Rank;
   registered: number;
-  lastSeen: number;
   lastRankingChange: number;
   avatarFile: string;
 }

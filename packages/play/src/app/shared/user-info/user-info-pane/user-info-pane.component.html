@@ -20,16 +20,13 @@
         </td>
       </tr>
       <tr>
-        <th translate>USERS_LAST_SEEN</th>
+        <th translate>USERS_STATUS</th>
         <td>
-          <span *ngIf="!user.connected && user.lastSeen > 0">
-            {{ user.lastSeen | date: ('DATE_FORMAT' | translate) }}
-          </span>
-          <ptcg-badge *ngIf="!user.connected && user.lastSeen === 0">
-            {{ 'USERS_NEVER' | translate }}
-          </ptcg-badge>
           <ptcg-badge *ngIf="user.connected">
             {{ 'USERS_ONLINE' | translate }}
+          </ptcg-badge>
+          <ptcg-badge *ngIf="!user.connected">
+            {{ 'USERS_OFFLINE' | translate }}
           </ptcg-badge>
         </td>
       </tr>

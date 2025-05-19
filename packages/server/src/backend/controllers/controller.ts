@@ -34,7 +34,6 @@ export abstract class Controller {
       ranking: user.ranking,
       rank: user.getRank(),
       registered: user.registered,
-      lastSeen: user.lastSeen,
       lastRankingChange: user.lastRankingChange,
       avatarFile: user.avatarFile,
       connected

@@ -22,7 +22,7 @@ export class Core {
   constructor(storage: Storage) {
     this.db = storage;
     this.messager = new Messager(this);
-    const cleanerTask = new CleanerTask(this);
+    const cleanerTask = new CleanerTask();
     cleanerTask.startTasks();
     this.startRankingDecrease();
   }

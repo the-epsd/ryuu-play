@@ -13,7 +13,7 @@ import { DeckEditPane } from '../deck-edit-panes/deck-edit-pane.interface';
 import { DeckEditToolbarFilter } from '../deck-edit-toolbar/deck-edit-toolbar-filter.interface';
 import { DeckService } from '../../api/services/deck.service';
 import { FileDownloadService } from '../../shared/file-download/file-download.service';
-import { Archetype } from '@ptcg/common';
+import { Archetype, EnergyCard, EnergyType, PokemonCard, SuperType, TrainerCard, TrainerType, CardType } from '@ptcg/common';
 
 @UntilDestroy()
 @Component({
@@ -58,9 +58,26 @@ export class DeckEditComponent implements OnInit {
       });
   }
 
+  private compareCardType(input: CardType): number {
+    const typeOrder = [
+      CardType.GRASS,
+      CardType.FIRE,
+      CardType.WATER,
+      CardType.LIGHTNING,
+      CardType.PSYCHIC,
+      CardType.FIGHTING,
+      CardType.DARK,
+      CardType.METAL,
+      CardType.COLORLESS,
+      CardType.FAIRY,
+      CardType.DRAGON
+    ];
+    return typeOrder.indexOf(input);
+  }
+
   private loadDeckItems(cardNames: string[]): DeckItem[] {
     const itemMap: { [name: string]: DeckItem } = {};
-    const deckItems: DeckItem[] = [];
+    let deckItems: DeckItem[] = [];
 
     for (const name of cardNames) {
       if (itemMap[name] !== undefined) {
@@ -72,14 +89,107 @@ export class DeckEditComponent implements OnInit {
             card,
             count: 1,
             pane: DeckEditPane.DECK,
-            scanUrl: this.cardsBaseService.getScanUrl(card)
+            scanUrl: this.cardsBaseService.getScanUrl(card),
           };
           deckItems.push(itemMap[name]);
         }
       }
     }
 
+    // First sort by supertype
+    deckItems.sort((a, b) => {
+      const superTypeCompare = this.compareSupertype(a.card.superType) - this.compareSupertype(b.card.superType);
+      if (superTypeCompare !== 0) return superTypeCompare;
+
+      // Then sort by specific type within each supertype
+      switch (a.card.superType) {
+        case SuperType.POKEMON:
+          // Sort Pokemon by card type first
+          const aPokemon = a.card as PokemonCard;
+          const bPokemon = b.card as PokemonCard;
+          const cardTypeCompare = this.compareCardType(aPokemon.cardType) - this.compareCardType(bPokemon.cardType);
+          if (cardTypeCompare !== 0) return cardTypeCompare;
+
+          // Then by evolution stage (basic first)
+          if (!aPokemon.evolvesFrom && bPokemon.evolvesFrom) return -1;
+          if (aPokemon.evolvesFrom && !bPokemon.evolvesFrom) return 1;
+
+          // Then alphabetically
+          return a.card.name.localeCompare(b.card.name);
+
+        case SuperType.TRAINER:
+          // Sort Trainers by trainer type
+          const aTrainer = a.card as TrainerCard;
+          const bTrainer = b.card as TrainerCard;
+          const trainerTypeCompare = this.compareTrainerType(aTrainer.trainerType) - this.compareTrainerType(bTrainer.trainerType);
+          if (trainerTypeCompare !== 0) return trainerTypeCompare;
+
+          // Then alphabetically
+          return a.card.name.localeCompare(b.card.name);
+
+        case SuperType.ENERGY:
+          // Sort Energy by energy type
+          const aEnergy = a.card as EnergyCard;
+          const bEnergy = b.card as EnergyCard;
+          const energyTypeCompare = this.compareEnergyType(aEnergy.energyType) - this.compareEnergyType(bEnergy.energyType);
+          if (energyTypeCompare !== 0) return energyTypeCompare;
+
+          // For basic energy, sort by card type
+          if (aEnergy.energyType === EnergyType.BASIC && bEnergy.energyType === EnergyType.BASIC) {
+            // Compare first energy type in provides array
+            const aType = aEnergy.provides[0] || CardType.COLORLESS;
+            const bType = bEnergy.provides[0] || CardType.COLORLESS;
+            const energyCardTypeCompare = this.compareCardType(aType) - this.compareCardType(bType);
+            if (energyCardTypeCompare !== 0) return energyCardTypeCompare;
+          }
+
+          // Then alphabetically
+          return a.card.name.localeCompare(b.card.name);
+
+        default:
+          return a.card.name.localeCompare(b.card.name);
+      }
+    });
+
+    // Finally, group evolutions together
+    deckItems = this.sortByPokemonEvolution(deckItems);
+
     return deckItems;
+  }
+
+  sortByPokemonEvolution(cards: DeckItem[]): DeckItem[] {
+    // First, separate cards by type
+    const pokemonCards = cards.filter(d => d.card.superType === SuperType.POKEMON);
+    const nonPokemonCards = cards.filter(d => d.card.superType !== SuperType.POKEMON);
+
+    // Sort Pokemon by evolution
+    for (let i = pokemonCards.length - 1; i >= 0; i--) {
+      if ((<PokemonCard>pokemonCards[i].card).evolvesFrom) {
+        const indexOfPrevolution = this.findLastIndex(
+          pokemonCards,
+          c => c.card.name === (<PokemonCard>pokemonCards[i].card).evolvesFrom
+        );
+
+        if (indexOfPrevolution === -1) {
+          continue;
+        }
+
+        const currentPokemon = { ...pokemonCards.splice(i, 1)[0] };
+
+        pokemonCards.splice(indexOfPrevolution + 1, 0, currentPokemon);
+      }
+    }
+
+    // Recombine the cards in the correct order
+    return [...pokemonCards, ...nonPokemonCards];
+  }
+
+  findLastIndex<T>(array: Array<T>, predicate: (value: T, index: number, obj: T[]) => boolean): number {
+    for (let i = array.length - 1; i >= 0; i--) {
+      if (predicate(array[i], i, array))
+        return i;
+    }
+    return -1;
   }
 
   public importDeck(cardNames: string[]) {
@@ -134,4 +244,24 @@ export class DeckEditComponent implements OnInit {
     });
   }
 
+  compareSupertype = (input: SuperType) => {
+    if (input === SuperType.POKEMON) return 1;
+    if (input === SuperType.TRAINER) return 2;
+    if (input === SuperType.ENERGY) return 3;
+    return Infinity;
+  };
+
+  compareTrainerType = (input: TrainerType) => {
+    if (input === TrainerType.SUPPORTER) return 1;
+    if (input === TrainerType.ITEM) return 2;
+    if (input === TrainerType.TOOL) return 3;
+    if (input === TrainerType.STADIUM) return 4;
+    return Infinity;
+  };
+
+  compareEnergyType = (input: EnergyType) => {
+    if (input === EnergyType.BASIC) return 1;
+    if (input === EnergyType.SPECIAL) return 2;
+    return Infinity;
+  };
 }
