@@ -5,6 +5,7 @@ import { DndModule } from '@ng-dnd/core';
 import { DndMultiBackendModule, MultiBackend, HTML5ToTouch } from '@ng-dnd/multi-backend';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { ApiModule } from './api/api.module';
 import { AppComponent } from './app.component';
@@ -31,6 +32,7 @@ import { TableModule } from './table/table.module';
     ApiModule,
     AppRoutingModule,
     BrowserModule,
+    BrowserAnimationsModule,
     DeckModule,
     GamesModule,
     LoginModule,

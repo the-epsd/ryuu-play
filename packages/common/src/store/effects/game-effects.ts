@@ -209,6 +209,7 @@ export class EvolveEffect implements Effect {
     this.player = player;
     this.target = target;
     this.pokemonCard = pokemonCard;
+    this.target.showBasicAnimation = false;
     this.target.triggerAnimation = true;
   }
 }

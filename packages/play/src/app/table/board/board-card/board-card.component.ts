@@ -247,7 +247,8 @@ export class BoardCardComponent implements OnInit, OnDestroy {
       !this.hasPlayedTestAnimation &&
       cardList.triggerAnimation &&
       !this.showTestAnimation &&
-      !this.isInPrompt) {
+      !this.isInPrompt &&
+      !cardList.showBasicAnimation) {
 
       this.hasPlayedTestAnimation = true;
       this.showTestAnimation = true;
@@ -267,7 +268,8 @@ export class BoardCardComponent implements OnInit, OnDestroy {
       !this.hasPlayedBasicAnimation &&
       cardList.showBasicAnimation &&
       !this.showBasicAnimation &&
-      !this.isInPrompt) {
+      !this.isInPrompt &&
+      !cardList.triggerAnimation) {
 
       this.hasPlayedBasicAnimation = true;
       this.showBasicAnimation = true;

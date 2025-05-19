@@ -100,7 +100,7 @@ export class RankingComponent implements OnInit {
     if (this.sessionService.session.config) {
       pageSize = this.sessionService.session.config.defaultPageSize;
     }
-    this.pageSizeOptions = [ pageSize ];
+    this.pageSizeOptions = [pageSize];
     this.pageSize = pageSize;
   }
 
@@ -131,6 +131,25 @@ export class RankingComponent implements OnInit {
       query: this.searchValue,
       page: this.pageIndex
     });
+  }
+
+  public get loggedUser() {
+    return this.sessionService.session.users?.[this.loggedUserId];
+  }
+
+  public get topPlayers() {
+    return this.ranking.slice(0, 3);
+  }
+
+  public get otherPlayers() {
+    return this.ranking.slice(3);
+  }
+
+  public get loggedUserPosition(): number | null {
+    const idx = this.ranking.findIndex(
+      (row) => row.user.userId === this.loggedUserId
+    );
+    return idx !== -1 ? this.ranking[idx].position : null;
   }
 
 }
