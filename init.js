@@ -57,6 +57,7 @@ cardManager.defineSet(sets.setJourneyTogether);
 cardManager.defineSet(sets.setM1S);
 cardManager.defineSet(sets.setObsidianFlames);
 cardManager.defineSet(sets.setPaldeaEvolved);
+cardManager.defineSet(sets.setPokemon151);
 cardManager.defineSet(sets.setScarletAndViolet);
 cardManager.defineSet(sets.setScarletAndVioletEnergy);
 cardManager.defineSet(sets.setScarletAndVioletPromos);
