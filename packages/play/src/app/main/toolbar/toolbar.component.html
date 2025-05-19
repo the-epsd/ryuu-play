@@ -1,4 +1,4 @@
-<mat-toolbar color="primary" [ngClass]="{'is-logged-in': loggedUser}">
+<mat-toolbar color="primary" [ngClass]="{'is-logged-in': loggedUser}" *ngIf="!isInGame">
   <button mat-button (click)="onLogoClick()">{{ 'MAIN_TITLE' | translate }}</button>
   <span class="ryuu-spacer"></span>
 
@@ -9,10 +9,7 @@
     <button *ngIf="!loggedUser" mat-button (click)="login()">
       {{ 'BUTTON_LOGIN' | translate }}
     </button>
-    <ptcg-user-bar *ngIf="loggedUser"
-      class="ptcg-logged-user"
-      [openUserPopup]="false"
-      [user]="loggedUser"
+    <ptcg-user-bar *ngIf="loggedUser" class="ptcg-logged-user" [openUserPopup]="false" [user]="loggedUser"
       [matMenuTriggerFor]="menu">
     </ptcg-user-bar>
     <mat-menu #menu="matMenu">

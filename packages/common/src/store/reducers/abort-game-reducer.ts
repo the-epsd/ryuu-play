@@ -3,9 +3,9 @@ import { State, GamePhase, GameWinner } from '../state/state';
 import { GameError } from '../../game-error';
 import { GameMessage, GameLog } from '../../game-message';
 import { StoreLike } from '../store-like';
-import { AbortGameAction, AbortGameReason} from '../actions/abort-game-action';
+import { AbortGameAction, AbortGameReason } from '../actions/abort-game-action';
 import { endGame } from '../effect-reducers/check-effect';
-import {StateUtils} from '../state-utils';
+import { StateUtils } from '../state-utils';
 
 
 export function abortGameReducer(store: StoreLike, state: State, action: Action): State {
@@ -47,26 +47,12 @@ export function abortGameReducer(store: StoreLike, state: State, action: Action)
 
     // Let's decide who wins.
     const opponent = StateUtils.getOpponent(state, culprit);
-    const culpritPrizeLeft = culprit.getPrizeLeft();
-    const opponentPrizeLeft = opponent.getPrizeLeft();
 
-    // It was first turn, no winner
-    if (state.turn <= 2 && culpritPrizeLeft === opponentPrizeLeft) {
-      state = endGame(store, state, GameWinner.NONE);
-      return state;
-    }
-
-    // Opponent has same or less prizes, he wins
-    if (opponentPrizeLeft <= culpritPrizeLeft) {
-      const winner = opponent === state.players[0]
-        ? GameWinner.PLAYER_1
-        : GameWinner.PLAYER_2;
-      state = endGame(store, state, winner);
-      return state;
-    }
-
-    // Otherwise it's a draw
-    state = endGame(store, state, GameWinner.DRAW);
+    // The remaining player always wins
+    const winner = opponent === state.players[0]
+      ? GameWinner.PLAYER_1
+      : GameWinner.PLAYER_2;
+    state = endGame(store, state, winner);
   }
 
   return state;

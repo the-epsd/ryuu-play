@@ -21,6 +21,7 @@ export class ToolbarComponent implements OnInit {
 
   private loggedUser$: Observable<UserInfo | undefined>;
   public loggedUser: UserInfo | undefined;
+  public isInGame: boolean = false;
 
   constructor(
     private loginPopupService: LoginPopupService,
@@ -34,6 +35,16 @@ export class ToolbarComponent implements OnInit {
     ).pipe(map(([loggedUserId, users]) => {
       return users[loggedUserId];
     }));
+
+    // Subscribe to game states to detect if we're in a game
+    this.sessionService.get(session => session.gameStates)
+      .pipe(
+        untilDestroyed(this),
+        map(gameStates => gameStates.length > 0)
+      )
+      .subscribe(inGame => {
+        this.isInGame = inGame;
+      });
   }
 
   public ngOnInit() {
@@ -53,7 +64,9 @@ export class ToolbarComponent implements OnInit {
   }
 
   public onLogoClick() {
-    this.logoClick.emit();
+    if (!this.isInGame) {
+      this.logoClick.emit();
+    }
   }
 
 }
