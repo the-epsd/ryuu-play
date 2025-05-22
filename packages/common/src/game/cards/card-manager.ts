@@ -1,4 +1,5 @@
-import { Card } from '../../store/card/card';
+import { CardsInfo } from '../../interfaces';
+import { Card } from '../../store';
 import { deepClone } from '../../utils';
 
 export class CardManager {
@@ -7,36 +8,49 @@ export class CardManager {
 
   private cards: Card[] = [];
 
+  private cardIndex: { [name: string]: number } = {};
+
   public static getInstance(): CardManager {
     if (!CardManager.instance) {
       CardManager.instance = new CardManager();
     }
-
     return CardManager.instance;
   }
 
-  public defineSet(cards: Card[]): void {
-    this.cards.push(...cards);
+  public defineSet(set: Card[]): void {
+    for (const card of set) {
+      let index = this.cardIndex[card.fullName];
+      if (index !== undefined && this.cards[index] !== card) {
+        throw new Error('Multiple cards with the same name: ' + card.fullName);
+      }
+      if (index === undefined) {
+        index = this.cards.length;
+        this.cardIndex[card.fullName] = index;
+        this.cards.push(card);
+      }
+    }
   }
 
-  public defineCard(card: Card): void {
-    this.cards.push(card);
+  public loadCardsInfo(cardsInfo: CardsInfo) {
+    this.cardIndex = {};
+    this.cards = cardsInfo.cards;
+    for (let i = 0; i < this.cards.length; i++) {
+      this.cardIndex[this.cards[i].fullName] = i;
+    }
   }
 
   public getCardByName(name: string): Card | undefined {
-    let card = this.cards.find(c => c.fullName === name);
-    if (card !== undefined) {
-      card = deepClone(card);
+    const index = this.cardIndex[name];
+    if (index !== undefined) {
+      return deepClone(this.cards[index]);
     }
-    return card;
   }
 
   public isCardDefined(name: string): boolean {
-    return this.cards.find(c => c.fullName === name) !== undefined;
+    return this.cardIndex[name] !== undefined;
   }
 
   public getAllCards(): Card[] {
     return this.cards;
   }
-
 }

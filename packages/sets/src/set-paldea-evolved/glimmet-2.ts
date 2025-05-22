@@ -13,7 +13,7 @@ function* useAscension(next: Function, store: StoreLike, state: State,
     player,
     GameMessage.CHOOSE_CARD_TO_EVOLVE,
     player.deck,
-    { superType: SuperType.POKEMON, stage: Stage.STAGE_1, evolvesFrom: 'Glimmet'},
+    { superType: SuperType.POKEMON, stage: Stage.STAGE_1, evolvesFrom: 'Glimmet' },
     { min: 1, max: 1, allowCancel: true }
   ), selected => {
     cards = selected || [];
@@ -37,7 +37,7 @@ export class Glimmet2 extends PokemonCard {
   public cardType: CardType = F;
   public hp: number = 40;
   public weakness = [{ type: G }];
-  public retreat = [ C ];
+  public retreat = [C];
 
   public attacks = [{
     name: 'Ascension',
@@ -51,7 +51,7 @@ export class Glimmet2 extends PokemonCard {
   public cardImage: string = 'assets/cardback.png';
   public setNumber: string = '124';
   public name: string = 'Glimmet';
-  public fullName: string = 'Glimmet PAL';
+  public fullName: string = 'Glimmet PAL2';
 
   public reduceEffect(store: StoreLike, state: State, effect: Effect): State {
 
