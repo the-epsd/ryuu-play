@@ -20,7 +20,7 @@ if (process.env.NODE_ENV === 'production' && process.env.DYNO) {
   config.backend.address = '0.0.0.0'; // Bind to all interfaces
 
   // Configure storage using environment variables
-  config.storage.type = process.env.STORAGE_TYPE || 'mysql';
+  config.storage.type = process.env.STORAGE_TYPE || 'mariadb';
   config.storage.host = process.env.STORAGE_HOST;
   config.storage.port = process.env.STORAGE_PORT ? parseInt(process.env.STORAGE_PORT) : 4002;
   config.storage.username = process.env.STORAGE_USERNAME;
