@@ -3,7 +3,8 @@ const { CardManager, StateSerializer } = require('@ptcg/common');
 const { mkdirSync, existsSync } = require('node:fs');
 const path = require('path');
 const sets = require('@ptcg/sets');
-require('dotenv').config();
+const dotenv = require('dotenv');
+dotenv.config();
 
 // Configure backend
 config.backend.address = 'localhost';
@@ -13,9 +14,13 @@ config.backend.webUiDir = path.join(__dirname, 'packages/play/dist/ptcg-play');
 config.backend.serverPassword = process.env.SERVER_PASSWORD || '';
 config.backend.secret = process.env.SERVER_SECRET || '!secret!';
 
-// Configure storage
-config.storage.type = 'sqlite';
-config.storage.database = path.join(__dirname, 'database.sq3');
+// Configure storage using environment variables
+config.storage.type = process.env.STORAGE_TYPE || 'mysql';
+config.storage.host = process.env.STORAGE_HOST;
+config.storage.port = process.env.STORAGE_PORT ? parseInt(process.env.STORAGE_PORT) : 4002;
+config.storage.username = process.env.STORAGE_USERNAME;
+config.storage.password = process.env.STORAGE_DATABASE_PASSWORD;
+config.storage.database = process.env.STORAGE_DATABASE;
 
 // Configure bots
 config.bots.defaultPassword = 'bot';

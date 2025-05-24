@@ -3,6 +3,8 @@ const { CardManager, StateSerializer } = require('@ptcg/common');
 const { mkdirSync, existsSync } = require('node:fs');
 const path = require('path');
 const sets = require('@ptcg/sets');
+const dotenv = require('dotenv');
+dotenv.config();
 
 let config = baseConfig;
 
@@ -16,6 +18,14 @@ if (process.env.NODE_ENV === 'production' && process.env.DYNO) {
   // Ensure the app binds to the PORT environment variable
   config.backend.port = process.env.PORT || 12021;
   config.backend.address = '0.0.0.0'; // Bind to all interfaces
+
+  // Configure storage using environment variables
+  config.storage.type = process.env.STORAGE_TYPE || 'mysql';
+  config.storage.host = process.env.STORAGE_HOST;
+  config.storage.port = process.env.STORAGE_PORT ? parseInt(process.env.STORAGE_PORT) : 4002;
+  config.storage.username = process.env.STORAGE_USERNAME;
+  config.storage.password = process.env.STORAGE_DATABASE_PASSWORD;
+  config.storage.database = process.env.STORAGE_DATABASE;
 
   const cardManager = CardManager.getInstance();
   // cardManager.defineSet(sets.setAncientOrigins);

@@ -32,8 +32,16 @@ config.backend.avatarsDir = __dirname + '/avatars';
 config.backend.webUiDir = __dirname + '/packages/play/dist/ptcg-play';
 
 // Storage config
-config.storage.type = 'sqlite';
-config.storage.database = __dirname + '/database.sq3';
+// config.storage.type = 'sqlite';
+// config.storage.database = __dirname + '/database.sq3';
+
+// Storage config
+config.storage.type = process.env.STORAGE_TYPE;
+config.storage.host = process.env.STORAGE_HOST;
+config.storage.port = parseInt(process.env.STORAGE_PORT);
+config.storage.username = process.env.STORAGE_USERNAME;
+config.storage.password = process.env.STORAGE_DATABASE_PASSWORD;
+config.storage.database = process.env.STORAGE_DATABASE;
 
 // Bots config
 config.bots.defaultPassword = 'bot';

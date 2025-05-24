@@ -1,3 +1,6 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 export const config = {
   backend: {
     address: '0.0.0.0',
@@ -19,8 +22,19 @@ export const config = {
     webUiDir: ''  // Directory to ptcg-play static files (empty = UI disabled)
   },
   storage: {
-    type: 'sqlite',
-    database: 'database.sq3'
+    // Comment out or remove SQLite config
+    // type: 'sqlite',
+    // database: 'database.sq3'
+
+    // Add MySQL config
+    host: process.env.STORAGE_HOST,
+    user: process.env.STORAGE_USERNAME,
+    password: process.env.STORAGE_DATABASE_PASSWORD,
+    database: process.env.STORAGE_DATABASE,
+    port: process.env.STORAGE_PORT ? parseInt(process.env.STORAGE_PORT) : 3306,
+    ssl: {
+      rejectUnauthorized: false
+    }
   },
   core: {
     debug: false,
@@ -73,4 +87,9 @@ export const config = {
     appName: 'RyuuPlay',
     publicAddress: 'http://localhost' // Address inside the e-mail messages
   }
+};
+
+export const serverConfig = {
+  password: '',
+  secret: '!secret!'
 };
