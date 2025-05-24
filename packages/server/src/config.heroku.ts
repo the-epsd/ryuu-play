@@ -22,7 +22,7 @@ const herokuConfig = {
     // database: 'database.sq3'
 
     // Add MySQL config
-    host: process.env.STORAGE_HOST,
+    type: process.env.STORAGE_TYPE || 'mysql',
     user: process.env.STORAGE_USERNAME,
     password: process.env.STORAGE_DATABASE_PASSWORD,
     database: process.env.STORAGE_DATABASE,
