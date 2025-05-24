@@ -1,4 +1,4 @@
-import { config as baseConfig } from './config';
+import { config as baseConfig } from '../server/src/config.heroku';
 import * as path from 'path';
 
 const isHeroku = process.env.NODE_ENV === 'production' && process.env.DYNO;
