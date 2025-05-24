@@ -23,10 +23,11 @@ const herokuConfig = {
 
     // Add MySQL config
     type: process.env.STORAGE_TYPE || 'mysql',
-    user: process.env.STORAGE_USERNAME,
+    host: process.env.STORAGE_HOST,
+    username: process.env.STORAGE_USERNAME,
     password: process.env.STORAGE_DATABASE_PASSWORD,
     database: process.env.STORAGE_DATABASE,
-    port: process.env.STORAGE_PORT ? parseInt(process.env.STORAGE_PORT) : 3306,
+    port: process.env.STORAGE_PORT ? parseInt(process.env.STORAGE_PORT) : 4055,
     ssl: {
       rejectUnauthorized: false
     }
