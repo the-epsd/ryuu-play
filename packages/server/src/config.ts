@@ -27,6 +27,7 @@ export const config = {
     // database: 'database.sq3'
 
     // Add MySQL config
+    type: process.env.STORAGE_TYPE || 'mysql',
     host: process.env.STORAGE_HOST,
     username: process.env.STORAGE_USERNAME,
     password: process.env.STORAGE_DATABASE_PASSWORD,

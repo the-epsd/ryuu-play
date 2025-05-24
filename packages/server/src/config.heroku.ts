@@ -1,5 +1,7 @@
 import { config as baseConfig } from './config';
 import * as path from 'path';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 const isHeroku = process.env.NODE_ENV === 'production' && process.env.DYNO;
 
@@ -22,7 +24,7 @@ const herokuConfig = {
     // database: 'database.sq3'
 
     // Add MySQL config
-    type: process.env.STORAGE_TYPE || 'mariadb',
+    type: process.env.STORAGE_TYPE || 'mysql',
     host: process.env.STORAGE_HOST,
     username: process.env.STORAGE_USERNAME,
     password: process.env.STORAGE_DATABASE_PASSWORD,
