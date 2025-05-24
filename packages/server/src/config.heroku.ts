@@ -17,8 +17,19 @@ const herokuConfig = {
     secret: process.env.SECRET_KEY || '!secret!'
   },
   storage: {
-    type: 'sqlite',
-    database: process.env.SQLITE_PATH || '/app/database.sq3'
+    // Comment out or remove SQLite config
+    // type: 'sqlite',
+    // database: 'database.sq3'
+
+    // Add MySQL config
+    host: process.env.STORAGE_HOST,
+    user: process.env.STORAGE_USERNAME,
+    password: process.env.STORAGE_DATABASE_PASSWORD,
+    database: process.env.STORAGE_DATABASE,
+    port: process.env.STORAGE_PORT ? parseInt(process.env.STORAGE_PORT) : 3306,
+    ssl: {
+      rejectUnauthorized: false
+    }
   },
   sets: {
     ...baseConfig.sets,
