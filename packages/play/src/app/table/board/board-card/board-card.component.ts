@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ElementRef } from '@angular/core';
-import { PokemonCardList, Card, CardList, SuperType, SpecialCondition, BoardEffect, StadiumDirection } from '@ptcg/common';
+import { PokemonCardList, Card, CardList, SuperType, SpecialCondition, BoardEffect, StadiumDirection, PlayerType, SlotType } from '@ptcg/common';
 import { Subscription } from 'rxjs';
+import { BoardInteractionService } from 'src/app/api/services/board-interaction.service';
 
 const MAX_ENERGY_CARDS = 8;
 const MAX_ENERGY_CARDS_PER_TYPE = 4;
@@ -17,10 +18,12 @@ interface GroupedEnergy {
   styleUrls: ['./board-card.component.scss']
 })
 export class BoardCardComponent implements OnInit, OnDestroy {
+  private _cardList: CardList | PokemonCardList;
   @Input() showCardCount = false;
   @Output() cardClick = new EventEmitter<Card>();
 
   @Input() set cardList(value: CardList | PokemonCardList) {
+    this._cardList = value;
     this.mainCard = undefined;
     this.energyCards = [];
     this.groupedEnergies = [];
@@ -97,6 +100,30 @@ export class BoardCardComponent implements OnInit, OnDestroy {
   public BoardEffect = BoardEffect;
   public isUpsideDown = false;
 
+  public isSelectable = false;
+  public isSelected = false;
+
+  @Input() set player(value: PlayerType) {
+    if (value !== undefined) {
+      this.cardTarget = { ...this.cardTarget, player: value };
+      this.updateSelectionState();
+    }
+  }
+
+  @Input() set slot(value: SlotType) {
+    if (value !== undefined) {
+      this.cardTarget = { ...this.cardTarget, slot: value };
+      this.updateSelectionState();
+    }
+  }
+
+  @Input() set index(value: number) {
+    if (value !== undefined) {
+      this.cardTarget = { ...this.cardTarget, index: value };
+      this.updateSelectionState();
+    }
+  }
+
   private isSecret = false;
   private isPublic = false;
   private isOwner = false;
@@ -111,6 +138,11 @@ export class BoardCardComponent implements OnInit, OnDestroy {
   private animationElement: HTMLElement;
   private isInPrompt = false;
   private subscriptions: Subscription[] = [];
+  private cardTarget: { player: PlayerType, slot: SlotType, index: number };
+
+  get cardList(): CardList | PokemonCardList {
+    return this._cardList;
+  }
 
   private animationEndHandler = () => {
     if (this.animationElement) {
@@ -137,11 +169,49 @@ export class BoardCardComponent implements OnInit, OnDestroy {
   };
 
   constructor(
-    private elementRef: ElementRef
+    private elementRef: ElementRef,
+    private boardInteractionService: BoardInteractionService,
   ) { }
 
   ngOnInit() {
-    // Animation settings are now always enabled
+    // Subscribe to selection mode changes
+    this.subscriptions.push(
+      this.boardInteractionService.selectionMode$.subscribe(() => {
+        this.updateSelectionState();
+      })
+    );
+
+    // Subscribe to selected targets changes
+    this.subscriptions.push(
+      this.boardInteractionService.selectedTargets$.subscribe(() => {
+        this.updateSelectionState();
+      })
+    );
+
+    // Create animation end handlers
+    this.animationEndHandler = () => {
+      if (this.animationElement) {
+        this.animationElement.removeEventListener('animationend', this.animationEndHandler);
+        this.showTestAnimation = false;
+        this.hasPlayedTestAnimation = true;
+        this.animationElement = null;
+        if (this._cardList instanceof PokemonCardList) {
+          this._cardList.triggerAnimation = false;
+        }
+      }
+    };
+
+    this.basicAnimationEndHandler = () => {
+      if (this.animationElement) {
+        this.animationElement.removeEventListener('animationend', this.basicAnimationEndHandler);
+        this.showBasicAnimation = false;
+        this.hasPlayedBasicAnimation = true;
+        this.animationElement = null;
+        if (this._cardList instanceof PokemonCardList) {
+          this._cardList.showBasicAnimation = false;
+        }
+      }
+    };
   }
 
   ngOnDestroy() {
@@ -313,5 +383,28 @@ export class BoardCardComponent implements OnInit, OnDestroy {
       'Holon\'s Electrode': '/assets/energy/holons-electrode.png',
     };
     return customImageUrls[card.name] || '';
+  }
+
+  private updateSelectionState() {
+    if (!this.cardTarget.player || !this.cardTarget.slot) {
+      this.isSelectable = false;
+      this.isSelected = false;
+      return;
+    }
+
+    let isSelectionMode = false;
+    this.boardInteractionService.selectionMode$.subscribe(mode => {
+      isSelectionMode = mode;
+    }).unsubscribe();
+
+    if (!isSelectionMode) {
+      this.isSelectable = false;
+      this.isSelected = false;
+      return;
+    }
+
+    const hasCards = this._cardList && this._cardList.cards && this._cardList.cards.length > 0;
+    this.isSelectable = hasCards && this.boardInteractionService.isTargetEligible(this.cardTarget);
+    this.isSelected = this.boardInteractionService.isTargetSelected(this.cardTarget);
   }
 }

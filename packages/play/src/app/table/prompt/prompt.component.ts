@@ -1,11 +1,12 @@
 import { AnimationEvent } from '@angular/animations';
 import { Component, Input, OnChanges, SimpleChanges, ViewEncapsulation } from '@angular/core';
-import { Prompt, GamePhase } from '@ptcg/common';
+
 
 import { GameService } from '../../api/services/game.service';
 import { GameOverPrompt } from './prompt-game-over/game-over.prompt';
 import { LocalGameState } from '../../shared/session/session.interface';
 import { ptcgPromptAnimations } from './prompt.animations';
+import { Prompt } from '@ptcg/common';
 
 @Component({
   selector: 'ptcg-prompt',
@@ -20,12 +21,8 @@ export class PromptComponent implements OnChanges {
   @Input() clientId: number;
 
   public isPromptVisible = false;
-
-  /** State of the dialog animation. */
   public animationState: 'void' | 'enter' | 'exit' = 'void';
-
   public prompt: Prompt<any>;
-
   public minimized = false;
 
   constructor(private gameService: GameService) { }
@@ -39,6 +36,17 @@ export class PromptComponent implements OnChanges {
     if (changes.gameState) {
       const previousState: LocalGameState = changes.gameState.previousValue;
       differentGame = !previousState || previousState.localId !== this.gameState.localId;
+    }
+
+    // In replay mode, we need special handling
+    if (this.gameState.replay) {
+      // If we're navigating through replay states (position changes), hide any active prompts
+      if (changes.gameState && changes.gameState.previousValue &&
+        changes.gameState.previousValue.replayPosition !== this.gameState.replayPosition) {
+        this.prompt = undefined;
+        this.toggle(false);
+        return;
+      }
     }
 
     let prompt = this.gameState.state.prompts.find(p => {
@@ -90,9 +98,8 @@ export class PromptComponent implements OnChanges {
   }
 
   private checkGameOver(gameState: LocalGameState): GameOverPrompt | undefined {
-    if (gameState.state.phase === GamePhase.FINISHED && gameState.gameOver === false) {
-      return new GameOverPrompt(this.clientId, gameState.state.winner);
-    }
+    // Return undefined to prevent the old game over prompt from appearing
+    // The new game over screen is now handled directly by the table component
+    return undefined;
   }
-
 }

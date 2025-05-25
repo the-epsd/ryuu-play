@@ -1,6 +1,7 @@
 @import '../../../theme/variables.scss';
 
 .ptcg-prompt-overlay {
+  will-change: opacity, visibility;
   bottom: 0;
   display: none;
   left: 0;
@@ -25,6 +26,7 @@
   position: absolute;
   right: 0;
   top: 0;
+  z-index: 2;
 }
 
 .ptcg-prompt-container {
@@ -37,7 +39,6 @@
   overflow: hidden;
   outline: 0;
   position: absolute;
-  z-index: 4;
 }
 
 .ptcg-prompt-card-preview {
@@ -63,6 +64,15 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.ptcg-damage-prompt-content {
+  display: block;
+  margin: 0 $ptcg-prompt-padding * -1;
+  padding: 0 $ptcg-prompt-padding;
+  max-height: 30%;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .ptcg-prompt-actions {
   padding: 8px 0;
   display: flex;
@@ -84,5 +94,5 @@
   bottom: map-get($padding, large);
   left: map-get($padding, large);
   position: absolute;
-  z-index: 4;
+  z-index: 2;
 }

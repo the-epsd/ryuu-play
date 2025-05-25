@@ -12,6 +12,7 @@ import { DeckService } from '../api/services/deck.service';
 import { GameService } from '../api/services/game.service';
 import { LocalGameState } from '../shared/session/session.interface';
 import { SessionService } from '../shared/session/session.service';
+import { BoardInteractionService } from '../api/services/board-interaction.service';
 
 @UntilDestroy()
 @Component({
@@ -38,13 +39,15 @@ export class TableComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private sessionService: SessionService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private boardInteractionService: BoardInteractionService
   ) {
     this.gameStates$ = this.sessionService.get(session => session.gameStates);
     this.clientId$ = this.sessionService.get(session => session.clientId);
   }
 
   ngOnInit() {
+    this.boardInteractionService.endBoardSelection();
     this.route.paramMap
       .pipe(
         withLatestFrom(this.gameStates$, this.clientId$),
@@ -65,6 +68,10 @@ export class TableComponent implements OnInit {
         this.gameState = gameStates.find(state => state.localId === this.gameId);
         this.updatePlayers(this.gameState, clientId);
       });
+  }
+
+  ngOnDestroy() {
+    this.boardInteractionService.endBoardSelection();
   }
 
   public play() {

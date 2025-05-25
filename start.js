@@ -44,8 +44,6 @@ if (process.env.NODE_ENV === 'production' && process.env.DYNO) {
   // Feed state-serializer with card definitions
   StateSerializer.setKnownCards(cardManager.getAllCards());
 
-  console.log('Final config.storage:', config.storage);
-
   // Ensure directories exist
   try {
     if (config.backend.avatarsDir) {

@@ -2,7 +2,7 @@ import { Component, Input, OnDestroy } from '@angular/core';
 import { DraggedItem } from '@ng-dnd/sortable';
 import { DropTarget, DndService } from '@ng-dnd/core';
 import { Observable } from 'rxjs';
-import { Player, SlotType, PlayerType, CardTarget, Card, CardList } from '@ptcg/common';
+import { Player, SlotType, PlayerType, CardTarget, Card, CardList, PokemonCardList } from '@ptcg/common';
 import { map } from 'rxjs/operators';
 
 import { HandItem, HandCardType } from '../hand/hand-item.interface';
@@ -10,6 +10,7 @@ import { BoardCardItem, BoardCardType } from './board-item.interface';
 import { CardsBaseService } from '../../shared/cards/cards-base.service';
 import { GameService } from '../../api/services/game.service';
 import { LocalGameState } from 'src/app/shared/session/session.interface';
+import { BoardInteractionService } from 'src/app/api/services/board-interaction.service';
 
 const MAX_BENCH_SIZE = 8;
 const DEFAULT_BENCH_SIZE = 5;
@@ -39,6 +40,9 @@ export class BoardComponent implements OnDestroy {
   public bottomActiveHighlight$: Observable<boolean>;
   public bottomBenchTarget: DropTargetType[];
   public bottomBenchHighlight$: Observable<boolean>[];
+
+  public readonly SlotType = SlotType;
+  public readonly PlayerType = PlayerType;
 
   get stadiumCard(): CardList {
     // If top player has a stadium card, use it
@@ -73,7 +77,8 @@ export class BoardComponent implements OnDestroy {
   constructor(
     private cardsBaseService: CardsBaseService,
     private dnd: DndService,
-    private gameService: GameService
+    private gameService: GameService,
+    private boardInteractionService: BoardInteractionService
   ) {
     // Bottom Player
     this.bottomActive = this.createBoardCardItem(PlayerType.BOTTOM_PLAYER, SlotType.ACTIVE);
@@ -187,6 +192,11 @@ export class BoardComponent implements OnDestroy {
     }
   }
 
+  ngOnInit() {
+    // Ensure board selection is cleared when board initializes
+    this.boardInteractionService.endBoardSelection();
+  }
+
   ngOnDestroy() {
     this.bottomActive.source.unsubscribe();
     this.bottomActiveTarget.unsubscribe();
@@ -236,7 +246,72 @@ export class BoardComponent implements OnDestroy {
   }
 
   public onCardClick(card: Card, cardList: CardList) {
-    this.cardsBaseService.showCardInfo({ card, cardList });
+    // Get the current selection mode state
+    let isSelectionMode = false;
+    this.boardInteractionService.selectionMode$.subscribe(mode => {
+      isSelectionMode = mode;
+    }).unsubscribe(); // Immediately unsubscribe to avoid memory leaks
+
+    // Check if we're in selection mode
+    if (isSelectionMode) {
+      // Handle board selection if in selection mode
+      this.handleSelectionModeCardClick(card, cardList);
+    } else {
+      // Normal card click behavior
+      this.cardsBaseService.showCardInfo({ card, cardList });
+    }
+  }
+
+  private handleSelectionModeCardClick(card: Card, cardList: CardList) {
+    // First, determine the target for the clicked card
+    let player: PlayerType;
+    let slot: SlotType;
+    let index: number = 0;
+
+    // Check if card is in top player's cards
+    if (this.topPlayer && (
+      (this.topPlayer.active === cardList) ||
+      this.topPlayer.bench.includes(cardList as PokemonCardList) ||
+      this.topPlayer.stadium === cardList
+    )) {
+      player = PlayerType.TOP_PLAYER;
+
+      if (this.topPlayer.active === cardList) {
+        slot = SlotType.ACTIVE;
+      } else if (this.topPlayer.stadium === cardList) {
+        slot = SlotType.BOARD;
+      } else {
+        slot = SlotType.BENCH;
+        index = this.topPlayer.bench.indexOf(cardList as PokemonCardList);
+      }
+    }
+    // Check if card is in bottom player's cards
+    else if (this.bottomPlayer && (
+      (this.bottomPlayer.active === cardList) ||
+      this.bottomPlayer.bench.includes(cardList as PokemonCardList) ||
+      this.bottomPlayer.stadium === cardList
+    )) {
+      player = PlayerType.BOTTOM_PLAYER;
+
+      if (this.bottomPlayer.active === cardList) {
+        slot = SlotType.ACTIVE;
+      } else if (this.bottomPlayer.stadium === cardList) {
+        slot = SlotType.BOARD;
+      } else {
+        slot = SlotType.BENCH;
+        index = this.bottomPlayer.bench.indexOf(cardList as PokemonCardList);
+      }
+    } else {
+      // Not a valid target for selection
+      return;
+    }
+
+    const target: CardTarget = { player, slot, index };
+
+    // Check if this target is eligible for selection
+    if (this.boardInteractionService.isTargetEligible(target)) {
+      this.boardInteractionService.toggleTarget(target);
+    }
   }
 
   public onCardListClick(card: Card, cardList: CardList) {
@@ -290,6 +365,15 @@ export class BoardComponent implements OnDestroy {
   }
 
   public onActiveClick(card: Card, cardList: CardList) {
+    let isSelectionMode = false;
+    this.boardInteractionService.selectionMode$.subscribe(mode => {
+      isSelectionMode = mode;
+    }).unsubscribe();
+
+    if (isSelectionMode) {
+      this.onCardClick(card, cardList);
+      return;
+    }
     const isBottomOwner = this.bottomPlayer && this.bottomPlayer.id === this.clientId;
     const isDeleted = this.gameState.deleted;
 
@@ -321,6 +405,17 @@ export class BoardComponent implements OnDestroy {
   }
 
   public onBenchClick(card: Card, cardList: CardList, index: number) {
+    // Get the current selection mode state
+    let isSelectionMode = false;
+    this.boardInteractionService.selectionMode$.subscribe(mode => {
+      isSelectionMode = mode;
+    }).unsubscribe();
+
+    // If in selection mode, handle it through the onCardClick method
+    if (isSelectionMode) {
+      this.onCardClick(card, cardList);
+      return;
+    }
     const isBottomOwner = this.bottomPlayer && this.bottomPlayer.id === this.clientId;
     const isDeleted = this.gameState.deleted;
 
