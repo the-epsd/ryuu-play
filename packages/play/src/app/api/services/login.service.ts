@@ -25,7 +25,7 @@ export class LoginService {
     private profileService: ProfileService,
     private sessionService: SessionService,
     private socketService: SocketService
-  ) {}
+  ) { }
 
   public login(name: string, password: string, loginAborted$: Observable<void>): Observable<LoginResponse> {
     return this.api.post<LoginResponse>('/v1/login', { name, password }).pipe(
@@ -53,7 +53,7 @@ export class LoginService {
     return combineLatest([
       this.profileService.getMe(),
       this.messageService.getConversations(),
-      this.cardsService.getAll(),
+      this.cardsService.getCardsInfo(),
       this.waitForSocketConnection(response.token)
     ]).pipe(
       takeUntil(loginAborted$),
@@ -61,7 +61,7 @@ export class LoginService {
         this.sessionService.session.authToken = '';
         throw error;
       }),
-      map(([me, conversations, cards]) => {
+      map(([me, conversations, cardsInfo]) => {
 
         // Fetch logged user data
         const users = { ...this.sessionService.session.users };
@@ -78,7 +78,7 @@ export class LoginService {
         );
 
         // Fetch cards data
-        this.cardsBaseService.setCards(cards.cards);
+        this.cardsBaseService.loadCardsInfo(cardsInfo);
 
         // Store data in the session
         this.sessionService.set({
@@ -87,7 +87,7 @@ export class LoginService {
         });
 
         return response;
-    }));
+      }));
   }
 
   private waitForSocketConnection(token: string): Observable<boolean> {

@@ -9,7 +9,7 @@ import { SessionService } from '../session/session.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
-import { Card, StateSerializer, SuperType, PokemonCard, EnergyCard, CardType, TrainerCard } from '@ptcg/common';
+import { Card, StateSerializer, SuperType, PokemonCard, EnergyCard, CardType, TrainerCard, CardManager, CardsInfo } from '@ptcg/common';
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +18,7 @@ export class CardsBaseService {
 
   private cards: Card[] = [];
   private names: string[] = [];
+  private cardManager: CardManager;
   private customImages: { [key: string]: string } = {};
 
   constructor(
@@ -26,11 +27,13 @@ export class CardsBaseService {
     private sessionService: SessionService,
     private http: HttpClient
   ) {
+    this.cardManager = CardManager.getInstance();
     this.loadCustomImages();
   }
 
-  public setCards(cards: Card[]) {
-    this.cards = cards;
+  public loadCardsInfo(cardsInfo: CardsInfo) {
+    this.cardManager.loadCardsInfo(cardsInfo);
+    this.cards = this.cardManager.getAllCards().slice();
     this.names = this.cards.map(c => c.fullName);
     this.cards.sort(this.compareCards);
     StateSerializer.setKnownCards(this.cards);
